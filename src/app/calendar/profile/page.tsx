@@ -11,6 +11,8 @@ export default function ProfilePage() {
     const [saving, setSaving] = useState(false);
     const [fullName, setFullName] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
+    const [birthDate, setBirthDate] = useState('');
+    const [gender, setGender] = useState('male');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const router = useRouter();
 
@@ -31,6 +33,8 @@ export default function ProfilePage() {
             setProfile(data);
             setFullName(data.full_name || '');
             setPhoneNumber(data.phone_number || '');
+            setBirthDate(data.birth_date || '');
+            setGender(data.gender || 'male');
         }
         setLoading(false);
     }, [router]);
@@ -47,6 +51,8 @@ export default function ProfilePage() {
             .update({
                 full_name: fullName,
                 phone_number: phoneNumber,
+                birth_date: birthDate,
+                gender: gender,
             })
             .eq('id', profile.id);
 
@@ -54,7 +60,13 @@ export default function ProfilePage() {
             alert('프로필 수정 중 오류가 발생했습니다.');
         } else {
             alert('프로필이 성공적으로 수정되었습니다.');
-            setProfile({ ...profile, full_name: fullName, phone_number: phoneNumber });
+            setProfile({
+                ...profile,
+                full_name: fullName,
+                phone_number: phoneNumber,
+                birth_date: birthDate,
+                gender: gender
+            });
         }
         setSaving(false);
     };
@@ -135,6 +147,27 @@ export default function ProfilePage() {
                                 onChange={(e) => setPhoneNumber(e.target.value)}
                                 placeholder="010-0000-0000"
                             />
+                        </div>
+                        <div className="input-with-label-row">
+                            <div className="input-group">
+                                <label>생년월일</label>
+                                <input
+                                    type="date"
+                                    value={birthDate}
+                                    onChange={(e) => setBirthDate(e.target.value)}
+                                />
+                            </div>
+                            <div className="input-group">
+                                <label>성별</label>
+                                <select
+                                    value={gender}
+                                    onChange={(e) => setGender(e.target.value)}
+                                >
+                                    <option value="male">남성</option>
+                                    <option value="female">여성</option>
+                                    <option value="other">기타</option>
+                                </select>
+                            </div>
                         </div>
                         <button
                             className="save-btn"
@@ -249,6 +282,12 @@ export default function ProfilePage() {
                     gap: 16px;
                 }
 
+                .input-with-label-row {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 12px;
+                }
+
                 .input-group label {
                     display: block;
                     font-size: 12px;
@@ -258,7 +297,7 @@ export default function ProfilePage() {
                     margin-left: 2px;
                 }
 
-                input {
+                input, select {
                     width: 100%;
                     padding: 12px 16px;
                     border-radius: 12px;
@@ -270,7 +309,7 @@ export default function ProfilePage() {
                     transition: all 0.2s;
                 }
 
-                input:focus {
+                input:focus, select:focus {
                     border-color: var(--accent-primary);
                     background: white;
                     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);

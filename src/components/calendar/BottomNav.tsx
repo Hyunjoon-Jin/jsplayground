@@ -4,35 +4,35 @@ import { Calendar, ClipboardList, Search, User } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 
 export default function BottomNav() {
-    const pathname = usePathname();
-    const router = useRouter();
+  const pathname = usePathname();
+  const router = useRouter();
 
-    const navItems = [
-        { icon: Calendar, label: '캘린더', path: '/calendar/month' },
-        { icon: ClipboardList, label: '일정관리', path: '/calendar/tasks' }, // Placeholder for tasks
-        { icon: Search, label: '검색', path: '/calendar/search' },
-        { icon: User, label: '프로필', path: '/calendar/profile' },
-    ];
+  const navItems = [
+    { icon: Calendar, label: '캘린더', path: '/calendar/month' },
+    { icon: ClipboardList, label: '일정관리', path: '/calendar/tasks' },
+    { icon: Search, label: '검색', path: '/calendar/tasks' }, // Integrated with tasks
+    { icon: User, label: '프로필', path: '/calendar/profile' },
+  ];
 
-    return (
-        <nav className="bottom-nav glass">
-            <div className="nav-items">
-                {navItems.map((item) => {
-                    const isActive = pathname.startsWith(item.path.split('/').slice(0, 3).join('/'));
-                    return (
-                        <button
-                            key={item.path}
-                            className={`nav-item ${isActive ? 'active' : ''}`}
-                            onClick={() => router.push(item.path)}
-                        >
-                            <item.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-                            <span>{item.label}</span>
-                        </button>
-                    );
-                })}
-            </div>
+  return (
+    <nav className="bottom-nav glass">
+      <div className="nav-items">
+        {navItems.map((item) => {
+          const isActive = pathname.startsWith(item.path.split('/').slice(0, 3).join('/'));
+          return (
+            <button
+              key={item.path}
+              className={`nav-item ${isActive ? 'active' : ''}`}
+              onClick={() => router.push(item.path)}
+            >
+              <item.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
 
-            <style jsx>{`
+      <style jsx>{`
         .bottom-nav {
           position: fixed;
           bottom: 0;
@@ -79,6 +79,6 @@ export default function BottomNav() {
           transform: scale(0.9);
         }
       `}</style>
-        </nav>
-    );
+    </nav>
+  );
 }

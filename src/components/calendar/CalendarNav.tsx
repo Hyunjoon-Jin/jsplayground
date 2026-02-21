@@ -87,11 +87,11 @@ function NavContent({ children }: { children: React.ReactNode }) {
         day: '일간 보기'
     };
 
-    const isProfilePage = pathname === '/calendar/profile';
+    const isFullPage = pathname === '/calendar/profile' || pathname === '/calendar/tasks';
 
     return (
         <div className="calendar-root">
-            {!isProfilePage && (
+            {!isFullPage && (
                 <header className="new-header">
                     <div className="header-top">
                         <h1 className="title-month">
@@ -137,7 +137,7 @@ function NavContent({ children }: { children: React.ReactNode }) {
                 {children}
             </main>
 
-            {!isProfilePage && (
+            {!isFullPage && (
                 <button className="fab-premium shadow-glow clickable" onClick={() => setIsModalOpen(true)}>
                     <Plus size={28} color="white" />
                 </button>

@@ -13,7 +13,7 @@ export interface Schedule {
     id: string;
     title: string;
     description?: string;
-    type: '업무' | '개인' | '학습' | '기타';
+    type: '미팅' | '회의' | '업무보고' | '운동' | '식사' | '명상' | '약속' | '병원' | '쇼핑' | '자기개발' | '강의' | '독서' | '기타';
     importance: 'high' | 'medium' | 'low';
     is_appointment: boolean;
     is_meeting: boolean;

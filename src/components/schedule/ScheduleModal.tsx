@@ -92,9 +92,24 @@ export default function ScheduleModal({ isOpen, onClose, onSave, initialDate }: 
             <div className="select-container">
               <label>유형</label>
               <select value={type} onChange={(e) => setType(e.target.value)}>
-                <option value="업무">업무</option>
-                <option value="개인">개인</option>
-                <option value="학습">학습</option>
+                <optgroup label="업무/비즈니스">
+                  <option value="미팅">미팅</option>
+                  <option value="회의">회의</option>
+                  <option value="업무보고">업무보고</option>
+                </optgroup>
+                <optgroup label="개인/라이프">
+                  <option value="운동">운동</option>
+                  <option value="식사">식사</option>
+                  <option value="명상">명상</option>
+                  <option value="약속">약속</option>
+                  <option value="병원">병원</option>
+                  <option value="쇼핑">쇼핑</option>
+                </optgroup>
+                <optgroup label="학습/성장">
+                  <option value="자기개발">자기개발</option>
+                  <option value="강의">강의</option>
+                  <option value="독서">독서</option>
+                </optgroup>
                 <option value="기타">기타</option>
               </select>
             </div>
