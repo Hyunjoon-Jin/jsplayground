@@ -23,7 +23,7 @@ export default function LoginPage() {
     });
 
     if (error) {
-      setError(error.message);
+      setError('이메일 또는 비밀번호가 일치하지 않습니다.');
       setLoading(false);
     } else {
       router.push('/calendar/month');
@@ -34,16 +34,16 @@ export default function LoginPage() {
   return (
     <div className="auth-container">
       <div className="auth-card glass">
-        <h1 className="auth-title">Welcome Back</h1>
-        <p className="auth-subtitle">Sign in to manage your schedule</p>
+        <h1 className="auth-title">반가워요!</h1>
+        <p className="auth-subtitle">로그인하여 일정을 관리해보세요</p>
 
         <form onSubmit={handleLogin} className="auth-form">
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">이메일 주소</label>
             <input
               id="email"
               type="email"
-              placeholder="name@example.com"
+              placeholder="example@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -51,7 +51,7 @@ export default function LoginPage() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">비밀번호</label>
             <input
               id="password"
               type="password"
@@ -65,12 +65,12 @@ export default function LoginPage() {
           {error && <div className="error-message">{error}</div>}
 
           <button type="submit" className="auth-button shadow-glow" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? '로그인 중...' : '로그인 하기'}
           </button>
         </form>
 
         <p className="auth-footer">
-          Don&apos;t have an account? <Link href="/register">Sign up</Link>
+          계정이 없으신가요? <Link href="/register">회원가입</Link>
         </p>
       </div>
 
@@ -120,7 +120,6 @@ export default function LoginPage() {
           color: var(--text-muted);
           margin-bottom: 8px;
           text-transform: uppercase;
-          letter-spacing: 0.05em;
         }
 
         .form-group input {
@@ -136,7 +135,6 @@ export default function LoginPage() {
         .form-group input:focus {
           background: rgba(255, 255, 255, 0.05);
           border-color: var(--accent-primary);
-          box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.1);
         }
 
         .error-message {
@@ -163,21 +161,6 @@ export default function LoginPage() {
           margin-top: 12px;
         }
 
-        .auth-button:hover {
-          background: var(--accent-secondary);
-          transform: translateY(-1px);
-        }
-
-        .auth-button:active {
-          transform: translateY(1px);
-        }
-
-        .auth-button:disabled {
-          opacity: 0.7;
-          cursor: not-allowed;
-          transform: none;
-        }
-
         .auth-footer {
           margin-top: 24px;
           font-size: var(--text-sm);
@@ -187,10 +170,6 @@ export default function LoginPage() {
         .auth-footer a {
           color: var(--accent-primary);
           font-weight: var(--weight-medium);
-        }
-
-        .auth-footer a:hover {
-          text-decoration: underline;
         }
       `}</style>
     </div>

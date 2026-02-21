@@ -5,6 +5,10 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE TABLE IF NOT EXISTS public.user_profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     display_name TEXT,
+    full_name TEXT,
+    phone_number TEXT,
+    birth_date DATE,
+    gender TEXT,
     avatar_url TEXT,
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -72,8 +76,22 @@ CREATE POLICY "Users can manage own schedules" ON public.schedules
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.user_profiles (id, display_name)
-  VALUES (new.id, new.raw_user_meta_data->>'full_name');
+  INSERT INTO public.user_profiles (
+    id, 
+    display_name, 
+    full_name, 
+    phone_number, 
+    birth_date, 
+    gender
+  )
+  VALUES (
+    new.id, 
+    new.raw_user_meta_data->>'full_name',
+    new.raw_user_meta_data->>'full_name',
+    new.raw_user_meta_data->>'phone_number',
+    (new.raw_user_meta_data->>'birth_date')::DATE,
+    new.raw_user_meta_data->>'gender'
+  );
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
