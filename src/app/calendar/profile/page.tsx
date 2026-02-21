@@ -80,26 +80,27 @@ export default function ProfilePage() {
     };
 
     const handleDeleteAccount = async () => {
-        // In a real app, you might want to call an edge function to delete the user from auth.users as well.
-        // For this MVP, we will delete the profile which cascades (if set up) or just sign out.
-        // Actually, deleting from auth.users requires admin privileges.
-        // We'll simulate by deleting profile data and signing out.
-
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
         setSaving(true);
-        // Note: Real account deletion should be handled by an API/Edge Function for security.
-        const { error } = await supabase.from('user_profiles').delete().eq('id', user.id);
+        try {
+            const response = await fetch('/api/auth/delete-account', {
+                method: 'POST',
+            });
 
-        if (error) {
-            alert('계정 삭제 중 오류가 발생했습니다.');
-            setSaving(false);
-        } else {
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || '계정 삭제 중 오류가 발생했습니다.');
+            }
+
             await supabase.auth.signOut();
             alert('계정이 성공적으로 삭제되었습니다. 이용해주셔서 감사합니다.');
             router.push('/login');
             router.refresh();
+        } catch (error: any) {
+            alert(error.message);
+        } finally {
+            setSaving(false);
+            setShowDeleteConfirm(false);
         }
     };
 

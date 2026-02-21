@@ -203,10 +203,24 @@ export default function RegisterPage() {
             <div className="agreement-box">
               <label className="agreement-title">개인정보 수집 및 이용 동의 (필수)</label>
               <div className="agreement-text">
-                본 서비스(Life Controller)는 회원가입 및 서비스 제공을 위해 아래와 같이 개인정보를 수집 및 이용합니다.
-                1. 수집 항목: 이름, 이메일, 연락처, 생년월일, 성별, 서비스 이용 기록
-                2. 수집 목적: 회원 식별, 서비스 제공(일정, 메모, 루틴 관리), 사용자 맞춤 리포트 생성, 중요 공지사항 전달
-                3. 보유 기간: 회원 탈퇴 시 즉시 파기하거나, 법령에 따라 일정 기간 보관이 필요한 경우 해당 기간 동안 보관합니다.
+                {`본 서비스(Life Controller)는 회원님의 개인정보를 안전하게 처리하며, 관련 법령을 준수합니다.
+
+1. 개인정보 수집 항목
+- 필수항목: 이름, 이메일, 비밀번호, 연락처, 생년월일, 성별
+- 자동수집항목: 서비스 이용 기록, 접속 로그, 쿠키, 접속 IP 정보
+
+2. 개인정보 수집 및 이용 목적
+- 서비스 가입 의사 확인 및 회원 식별
+- 일정 관리, 메모, 루틴 등 핵심 서비스 제공
+- Life Report 등 맞춤형 데이터 분석 및 리포트 생성
+- 서비스 개선을 위한 통계 분석 및 중요 공지사항 전달
+
+3. 개인정보의 보유 및 이용 기간
+- 회원 탈퇴 시까지 (탈퇴 후 즉시 파기)
+- 관련 법령에 따라 보관이 필요한 경우 해당 기간 동안 별도 보관
+
+4. 동의 거부 시 불이익
+- 필수항목 수집에 동의하지 않으실 경우 서비스 이용이 제한될 수 있습니다.`}
               </div>
               <label className="checkbox-label">
                 <input type="checkbox" checked={privacyAgreed} onChange={(e) => setPrivacyAgreed(e.target.checked)} />
@@ -217,10 +231,23 @@ export default function RegisterPage() {
             <div className="agreement-box">
               <label className="agreement-title">민감정보 수집 및 이용 동의 (필수)</label>
               <div className="agreement-text">
-                Life Controller는 사용자에게 최적화된 건강 및 생활 관리 서비스를 제공하기 위해 아래와 같은 민감정보를 처리합니다.
-                1. 수집 항목: 사용자가 일정 및 메모에 기입한 건강 데이터, 운동 기록, 식단 정보, 개인적 일정 상세 내역 등
-                2. 수집 목적: 사용자 맞춤형 분석 서비스(Life Report) 제공, 건강 및 목표 달성 효율화 지원
-                3. 보유 기간: 회원 탈퇴 시 또는 사용자가 해당 데이터를 직접 삭제 시까지 보관합니다.
+                {`Life Controller는 정밀한 맞춤형 생활 관리 서비스를 제공하기 위해 아래와 같은 정보를 수집합니다.
+
+1. 수집하는 민감정보 항목
+- 사용자가 직접 입력한 일정 상세 및 메모 내용
+- 운동 기록(종류, 강도) 및 식단 정보
+- 기타 생활 습관 및 목표 달성 관련 데이터
+
+2. 민감정보 수집 및 이용 목적
+- 사용자 맞춤형 분석 서비스(Life Report) 제공
+- AI 기반의 개인 맞춤 루틴 및 목표 추천
+- 데이터 기반의 자기관리 피드백 제공
+
+3. 민감정보의 보유 및 이용 기간
+- 회원 탈퇴 시 또는 사용자가 해당 데이터를 직접 삭제할 때까지 보관
+
+4. 동의 거부 시 불이익
+- 동의하지 않으실 경우 데이터 분석 기반의 핵심 기능 이용이 제한됩니다.`}
               </div>
               <label className="checkbox-label">
                 <input type="checkbox" checked={sensitiveAgreed} onChange={(e) => setSensitiveAgreed(e.target.checked)} />
