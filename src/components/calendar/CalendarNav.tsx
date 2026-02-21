@@ -87,55 +87,61 @@ function NavContent({ children }: { children: React.ReactNode }) {
         day: '일간 보기'
     };
 
+    const isProfilePage = pathname === '/calendar/profile';
+
     return (
         <div className="calendar-root">
-            <header className="new-header">
-                <div className="header-top">
-                    <h1 className="title-month">
-                        {format(currentDate, 'MMMM yyyy', { locale: ko })}
-                    </h1>
-                    <div className="nav-controls">
-                        <button onClick={handlePrev} className="icon-btn-subtle"><ChevronLeft size={20} /></button>
-                        <button onClick={handleNext} className="icon-btn-subtle"><ChevronRight size={20} /></button>
-                    </div>
-                </div>
-
-                <div className="header-bottom">
-                    <div className="view-selector-container">
-                        <button
-                            className="view-selector-btn"
-                            onClick={() => setIsViewDropdownOpen(!isViewDropdownOpen)}
-                        >
-                            {viewLabels[view]} <ChevronDown size={14} />
-                        </button>
-                        {isViewDropdownOpen && (
-                            <div className="view-dropdown shadow-lg">
-                                <Link onClick={() => setIsViewDropdownOpen(false)} href={`/calendar/month?date=${format(currentDate, 'yyyy-MM-dd')}`}>월간</Link>
-                                <Link onClick={() => setIsViewDropdownOpen(false)} href={`/calendar/week?date=${format(currentDate, 'yyyy-MM-dd')}`}>주간</Link>
-                                <Link onClick={() => setIsViewDropdownOpen(false)} href={`/calendar/day?date=${format(currentDate, 'yyyy-MM-dd')}`}>일간</Link>
-                            </div>
-                        )}
+            {!isProfilePage && (
+                <header className="new-header">
+                    <div className="header-top">
+                        <h1 className="title-month">
+                            {format(currentDate, 'MMMM yyyy', { locale: ko })}
+                        </h1>
+                        <div className="nav-controls">
+                            <button onClick={handlePrev} className="icon-btn-subtle"><ChevronLeft size={20} /></button>
+                            <button onClick={handleNext} className="icon-btn-subtle"><ChevronRight size={20} /></button>
+                        </div>
                     </div>
 
-                    <div className="filter-toggle">
-                        <span className="filter-label">약속/회의만 보기</span>
-                        <button
-                            className={`toggle-switch ${isFilterOn ? 'on' : ''}`}
-                            onClick={toggleFilter}
-                        >
-                            <span className="toggle-thumb" />
-                        </button>
+                    <div className="header-bottom">
+                        <div className="view-selector-container">
+                            <button
+                                className="view-selector-btn"
+                                onClick={() => setIsViewDropdownOpen(!isViewDropdownOpen)}
+                            >
+                                {viewLabels[view]} <ChevronDown size={14} />
+                            </button>
+                            {isViewDropdownOpen && (
+                                <div className="view-dropdown shadow-lg">
+                                    <Link onClick={() => setIsViewDropdownOpen(false)} href={`/calendar/month?date=${format(currentDate, 'yyyy-MM-dd')}`}>월간</Link>
+                                    <Link onClick={() => setIsViewDropdownOpen(false)} href={`/calendar/week?date=${format(currentDate, 'yyyy-MM-dd')}`}>주간</Link>
+                                    <Link onClick={() => setIsViewDropdownOpen(false)} href={`/calendar/day?date=${format(currentDate, 'yyyy-MM-dd')}`}>일간</Link>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="filter-toggle">
+                            <span className="filter-label">약속/회의만 보기</span>
+                            <button
+                                className={`toggle-switch ${isFilterOn ? 'on' : ''}`}
+                                onClick={toggleFilter}
+                            >
+                                <span className="toggle-thumb" />
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </header>
+                </header>
+            )}
 
             <main className="calendar-main-content">
                 {children}
             </main>
 
-            <button className="fab-premium shadow-glow clickable" onClick={() => setIsModalOpen(true)}>
-                <Plus size={28} color="white" />
-            </button>
+            {!isProfilePage && (
+                <button className="fab-premium shadow-glow clickable" onClick={() => setIsModalOpen(true)}>
+                    <Plus size={28} color="white" />
+                </button>
+            )}
 
             <ScheduleModal
                 isOpen={isModalOpen}
