@@ -33,9 +33,9 @@ export default function LoginPage() {
 
   return (
     <div className="auth-container">
-      <div className="auth-card glass">
-        <h1 className="auth-title">반가워요!</h1>
-        <p className="auth-subtitle">로그인하여 일정을 관리해보세요</p>
+      <div className="auth-card">
+        <h1 className="auth-title">로그인</h1>
+        <p className="auth-subtitle">Life Controller 계정으로 계속하기</p>
 
         <form onSubmit={handleLogin} className="auth-form">
           <div className="form-group">
@@ -64,13 +64,17 @@ export default function LoginPage() {
 
           {error && <div className="error-message">{error}</div>}
 
-          <button type="submit" className="auth-button shadow-glow" disabled={loading}>
+          <button type="submit" className="auth-button shadow-md" disabled={loading}>
             {loading ? '로그인 중...' : '로그인 하기'}
           </button>
         </form>
 
+        <div className="auth-divider">
+          <span>또는</span>
+        </div>
+
         <p className="auth-footer">
-          계정이 없으신가요? <Link href="/register">회원가입</Link>
+          계정이 없으신가요? <Link href="/register">회원가입 하기</Link>
         </p>
       </div>
 
@@ -80,29 +84,33 @@ export default function LoginPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 20px;
-          background: var(--bg-base);
+          padding: 24px;
+          background: #FFFFFF;
         }
 
         .auth-card {
           width: 100%;
-          max-width: 400px;
-          padding: 40px;
-          border-radius: var(--radius-lg);
+          max-width: 420px;
+          padding: 48px 32px;
+          background: #FFFFFF;
+          border-radius: 24px;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
           text-align: center;
+          border: 1px solid #F1F5F9;
         }
 
         .auth-title {
-          font-size: var(--text-2xl);
-          font-weight: var(--weight-bold);
+          font-size: 32px;
+          font-weight: 800;
           margin-bottom: 8px;
-          color: var(--text-primary);
+          color: #1E293B;
+          letter-spacing: -1px;
         }
 
         .auth-subtitle {
-          font-size: var(--text-sm);
-          color: var(--text-secondary);
-          margin-bottom: 32px;
+          font-size: 15px;
+          color: #64748B;
+          margin-bottom: 40px;
         }
 
         .auth-form {
@@ -110,66 +118,108 @@ export default function LoginPage() {
         }
 
         .form-group {
-          margin-bottom: 20px;
+          margin-bottom: 24px;
         }
 
         .form-group label {
           display: block;
-          font-size: var(--text-xs);
-          font-weight: var(--weight-medium);
-          color: var(--text-muted);
-          margin-bottom: 8px;
-          text-transform: uppercase;
+          font-size: 13px;
+          font-weight: 700;
+          color: #475569;
+          margin-bottom: 10px;
+          margin-left: 2px;
         }
 
         .form-group input {
           width: 100%;
-          padding: 12px 16px;
-          border-radius: var(--radius-md);
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid var(--border-subtle);
-          color: var(--text-primary);
-          transition: all 0.2s ease;
+          padding: 16px;
+          border-radius: 14px;
+          background: #F8FAFC;
+          border: 1px solid #E2E8F0;
+          color: #1E293B;
+          font-size: 16px;
+          transition: all 0.25s ease;
+          outline: none;
         }
 
         .form-group input:focus {
-          background: rgba(255, 255, 255, 0.05);
-          border-color: var(--accent-primary);
+          background: #FFFFFF;
+          border-color: #3B82F6;
+          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
 
         .error-message {
-          padding: 12px;
-          border-radius: var(--radius-sm);
-          background: rgba(239, 68, 68, 0.1);
-          color: var(--error);
-          font-size: var(--text-sm);
-          margin-bottom: 20px;
-          border: 1px solid rgba(239, 68, 68, 0.2);
+          padding: 14px;
+          border-radius: 12px;
+          background: #FEF2F2;
+          color: #EF4444;
+          font-size: 14px;
+          font-weight: 600;
+          margin-bottom: 24px;
+          border: 1px solid #FEE2E2;
+          text-align: center;
         }
 
         .auth-button {
           width: 100%;
-          padding: 14px;
-          border-radius: var(--radius-md);
-          background: var(--accent-primary);
+          padding: 18px;
+          border-radius: 16px;
+          background: #3B82F6;
           color: white;
-          font-weight: var(--weight-semibold);
-          font-size: var(--text-base);
+          font-weight: 800;
+          font-size: 17px;
           border: none;
           cursor: pointer;
-          transition: all 0.2s ease;
-          margin-top: 12px;
+          transition: all 0.3s ease;
+          margin-top: 8px;
+        }
+
+        .auth-button:hover {
+          background: #2563EB;
+          transform: translateY(-2px);
+        }
+
+        .auth-button:disabled {
+          opacity: 0.6;
+          transform: none;
+        }
+
+        .auth-divider {
+          margin: 32px 0;
+          position: relative;
+          text-align: center;
+        }
+
+        .auth-divider::before {
+          content: "";
+          position: absolute;
+          top: 50%;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: #F1F5F9;
+        }
+
+        .auth-divider span {
+          position: relative;
+          background: #FFFFFF;
+          padding: 0 16px;
+          font-size: 13px;
+          color: #94A3B8;
+          font-weight: 500;
         }
 
         .auth-footer {
-          margin-top: 24px;
-          font-size: var(--text-sm);
-          color: var(--text-secondary);
+          margin-top: 8px;
+          font-size: 15px;
+          color: #64748B;
         }
 
         .auth-footer a {
-          color: var(--accent-primary);
-          font-weight: var(--weight-medium);
+          color: #3B82F6;
+          font-weight: 700;
+          text-decoration: none;
+          margin-left: 6px;
         }
       `}</style>
     </div>

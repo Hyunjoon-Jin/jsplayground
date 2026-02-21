@@ -4,6 +4,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- 2. Create user_profiles table
 CREATE TABLE IF NOT EXISTS public.user_profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    email TEXT UNIQUE,
     display_name TEXT,
     full_name TEXT,
     phone_number TEXT,
@@ -78,6 +79,7 @@ RETURNS trigger AS $$
 BEGIN
   INSERT INTO public.user_profiles (
     id, 
+    email,
     display_name, 
     full_name, 
     phone_number, 
@@ -86,6 +88,7 @@ BEGIN
   )
   VALUES (
     new.id, 
+    new.email,
     new.raw_user_meta_data->>'full_name',
     new.raw_user_meta_data->>'full_name',
     new.raw_user_meta_data->>'phone_number',
