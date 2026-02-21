@@ -1,90 +1,84 @@
 :root {
   /* === Background === */
-  --bg-base:        #0D0D14;   /* 최하단 배경 */
-  --bg-surface:     #14141F;   /* 카드/패널 배경 */
-  --bg-elevated:    #1C1C2E;   /* 모달, 팝업 */
-  --bg-overlay:     rgba(13, 13, 20, 0.85); /* 딤 오버레이 */
+  --bg-base: #FFFFFF;
+  /* 메인 배경 (순백색) */
+  --bg-surface: #F8FAFC;
+  /* 보조 배경 (연한 블루그레이) */
+  --bg-elevated: #FFFFFF;
+  /* 모달, 팝업 */
+  --bg-overlay: rgba(0, 0, 0, 0.4);
+  /* 딤 오버레이 */
 
   /* === Brand / Accent === */
-  --accent-primary:   #6C63FF;  /* 메인 보라 */
-  --accent-secondary: #A78BFA;  /* 연보라 (호버, 선택) */
-  --accent-glow:      rgba(108, 99, 255, 0.35); /* 글로우 효과 */
+  --accent-primary: #3B82F6;
+  /* 메인 블루 (iOS 스타일) */
+  --accent-secondary: #60A5FA;
+  /* 연한 블루 */
+  --accent-glow: rgba(59, 130, 246, 0.15);
 
   /* === Text === */
-  --text-primary:   #F0EFFF;
-  --text-secondary: #9B99B8;
-  --text-muted:     #55546E;
-  --text-inverse:   #0D0D14;
+  --text-primary: #1E293B;
+  /* 진한 Slate */
+  --text-secondary: #64748B;
+  /* 중간 Slate */
+  --text-muted: #94A3B8;
+  /* 연한 Slate */
+  --text-inverse: #FFFFFF;
 
   /* === Border === */
-  --border-subtle:  rgba(255, 255, 255, 0.06);
-  --border-default: rgba(255, 255, 255, 0.12);
-  --border-focus:   #6C63FF;
+  --border-subtle: #F1F5F9;
+  --border-default: #E2E8F0;
+  --border-focus: #3B82F6;
 
-  /* === 일정 유형 컬러 === */
-  --schedule-work:     #4A9EFF;  /* 업무 — 파랑 */
-  --schedule-personal: #34D399;  /* 개인 — 초록 */
-  --schedule-study:    #F59E0B;  /* 학습 — 주황 */
-  --schedule-etc:      #94A3B8;  /* 기타 — 회색 */
-
-  /* === 중요도 === */
-  --importance-high:   #EF4444;  /* 높음 — 빨강 */
-  --importance-medium: #F59E0B;  /* 보통 — 노랑 */
-  --importance-low:    #6B7280;  /* 낮음 — 회색 */
+  /* === 일정 유형 컬러 (레퍼런스 이미지 기반) === */
+  --schedule-blue: #3B82F6;
+  --schedule-red: #EF4444;
+  --schedule-orange: #F59E0B;
+  --schedule-green: #10B981;
+  --schedule-gray: #94A3B8;
 
   /* === 상태 === */
-  --success: #34D399;
+  --success: #10B981;
   --warning: #F59E0B;
-  --error:   #EF4444;
-  --info:    #60A5FA;
+  --error: #EF4444;
+  --info: #3B82F6;
 
-  /* === 글래스모피즘 === */
-  --glass-bg:     rgba(28, 28, 46, 0.70);
-  --glass-border: rgba(108, 99, 255, 0.20);
-  --glass-blur:   blur(16px);
+  /* === 글래스모피즘 (라이트 모드용) === */
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(59, 130, 246, 0.1);
+  --glass-blur: blur(12px);
 
   /* === 그림자 === */
-  --shadow-sm:  0 2px 8px rgba(0, 0, 0, 0.40);
-  --shadow-md:  0 4px 20px rgba(0, 0, 0, 0.50);
-  --shadow-lg:  0 8px 40px rgba(0, 0, 0, 0.60);
-  --shadow-glow: 0 0 20px rgba(108, 99, 255, 0.30);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 4px 14px rgba(59, 130, 246, 0.2);
 
   /* === Typography === */
-  --font-base: 'Pretendard', -apple-system, sans-serif;
-  --text-xs:   11px;
-  --text-sm:   13px;
-  --text-base: 15px;
-  --text-md:   17px;
-  --text-lg:   20px;
-  --text-xl:   24px;
-  --text-2xl:  30px;
-
-  /* === Spacing === */
-  --space-1:  4px;
-  --space-2:  8px;
-  --space-3:  12px;
-  --space-4:  16px;
-  --space-5:  20px;
-  --space-6:  24px;
-  --space-8:  32px;
-  --space-10: 40px;
-  --space-12: 48px;
+  --font-base: 'Inter', 'Pretendard', -apple-system, sans-serif;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-md: 18px;
+  --text-lg: 22px;
+  --text-xl: 26px;
+  --text-2xl: 32px;
 
   /* Layout */
-  --header-height:   56px;
-  --tab-bar-height:  60px;
-  --fab-size:        56px;
-  --safe-area-bottom: env(safe-area-inset-bottom, 16px);
+  --header-height: 110px;
+  /* 헤더가 더 커짐 (필터 포함) */
+  --tab-bar-height: 70px;
+  --fab-size: 60px;
+  --safe-area-bottom: env(safe-area-inset-bottom, 20px);
 
   /* Radius */
-  --radius-sm:  6px;
-  --radius-md:  12px;
-  --radius-lg:  16px;
-  --radius-xl:  24px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
   --radius-full: 9999px;
 
   /* Timeline Grid */
-  --timeline-hour-height:  60px;
-  --timeline-15min-height: 15px;
-  --timeline-label-width:  52px;
+  --timeline-hour-height: 70px;
+  --timeline-label-width: 60px;
 }
