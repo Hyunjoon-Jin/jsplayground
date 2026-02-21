@@ -299,110 +299,160 @@ export default function TasksPage() {
                     margin-bottom: 32px;
                 }
 
-                .summary-card-modern {
+                .summary-card-infographic {
                     background: white;
-                    border-radius: 24px;
-                    padding: 20px;
+                    border-radius: 28px;
+                    padding: 24px;
                     border: 1px solid #F1F5F9;
                     display: flex;
                     flex-direction: column;
-                    gap: 12px;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    gap: 20px;
+                    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
                     cursor: pointer;
                     position: relative;
                     overflow: hidden;
+                    min-height: 180px;
                 }
 
-                .summary-card-modern:hover {
-                    transform: translateY(-4px);
-                    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+                .summary-card-infographic:hover {
+                    transform: translateY(-6px);
+                    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.08);
                     border-color: #E2E8F0;
                 }
 
-                .summary-card-modern.active {
-                    background: #F8FAFC;
+                .summary-card-infographic.active {
+                    background: #FAFBFC;
                     border-color: #CBD5E1;
+                    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.02);
                 }
 
-                .card-top {
+                .card-bg-icon {
+                    position: absolute;
+                    top: -20px;
+                    right: -20px;
+                    opacity: 0.03;
+                    pointer-events: none;
+                    transform: rotate(-15deg);
+                }
+
+                .card-content-top {
+                    position: relative;
+                    z-index: 1;
+                }
+
+                .header-row {
                     display: flex;
+                    justify-content: space-between;
                     align-items: center;
-                    gap: 10px;
+                    margin-bottom: 8px;
                 }
 
-                .icon-badge {
-                    width: 36px;
-                    height: 36px;
-                    border-radius: 12px;
+                .info-label {
+                    font-size: 14px;
+                    font-weight: 700;
+                    color: #94A3B8;
+                    letter-spacing: -0.01em;
+                }
+
+                .mini-icon-badge {
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 10px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                 }
 
-                .card-label {
-                    font-size: 14px;
-                    font-weight: 700;
-                    color: #64748B;
-                }
-
-                .card-main {
+                .data-row {
                     display: flex;
                     align-items: baseline;
-                    gap: 2px;
+                    gap: 4px;
                 }
 
-                .count-value {
-                    font-size: 32px;
+                .main-stat {
+                    font-size: 40px;
                     font-weight: 900;
                     line-height: 1;
+                    letter-spacing: -0.02em;
                 }
 
-                .count-unit {
-                    font-size: 13px;
+                .stat-unit {
+                    font-size: 12px;
                     font-weight: 700;
+                    color: #94A3B8;
+                    text-transform: uppercase;
+                }
+
+                .card-content-bottom {
+                    position: relative;
+                    z-index: 1;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                }
+
+                .visual-graph-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                }
+
+                .graph-bar-bg {
+                    height: 6px;
+                    background: #F1F5F9;
+                    border-radius: 100px;
+                    overflow: hidden;
+                }
+
+                .graph-bar-fill {
+                    height: 100%;
+                    border-radius: 100px;
+                    transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+                }
+
+                .graph-labels {
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 11px;
+                    font-weight: 700;
+                }
+
+                .graph-hint {
                     color: #94A3B8;
                 }
 
-                .card-footer {
-                    margin-top: auto;
+                .graph-value {
+                    color: #475569;
+                }
+
+                .card-preview-mini {
                     border-top: 1px solid #F1F5F9;
-                    padding-top: 10px;
+                    padding-top: 12px;
                 }
 
-                .mini-list {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 2px;
-                }
-
-                .list-item-text {
+                .preview-simple-text {
                     font-size: 12px;
                     font-weight: 600;
                     color: #475569;
+                    display: block;
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
                 }
 
-                .more-text {
+                .preview-empty-text {
                     font-size: 11px;
                     font-weight: 600;
-                    color: #94A3B8;
-                }
-
-                .no-schedules {
-                    font-size: 12px;
                     color: #CBD5E1;
                     font-style: italic;
                 }
 
-                .active-glow {
+                .active-border-glow {
                     position: absolute;
-                    bottom: 0;
                     left: 0;
                     right: 0;
+                    bottom: 0;
                     height: 4px;
-                    opacity: 0.6;
                 }
 
                 .active-filter-bar {

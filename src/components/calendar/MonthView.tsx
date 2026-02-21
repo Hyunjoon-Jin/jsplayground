@@ -52,6 +52,14 @@ export default function MonthView({ currentDate }: MonthViewProps) {
   const renderSchedules = (day: Date) => {
     let daySchedules = schedules.filter(s => isSameDay(new Date(s.start_time), day));
 
+    // Sort: Meetings/Appointments first, then others
+    daySchedules.sort((a, b) => {
+      const aPri = (a.is_meeting || a.is_appointment) ? 0 : 1;
+      const bPri = (b.is_meeting || b.is_appointment) ? 0 : 1;
+      if (aPri !== bPri) return aPri - bPri;
+      return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
+    });
+
     if (isFilterOn) {
       daySchedules = daySchedules.filter(s => s.is_appointment || s.is_meeting);
     }
@@ -61,19 +69,15 @@ export default function MonthView({ currentDate }: MonthViewProps) {
         {daySchedules.slice(0, 3).map(schedule => (
           <div
             key={schedule.id}
-            className={`schedule-block ${getBadgeClass(schedule)}`}
+            className={`schedule-chip ${getBadgeClass(schedule)}`}
             title={schedule.title}
             onClick={(e) => handleScheduleClick(schedule, e)}
           >
-            <div className="block-icon">{getIcon(schedule)}</div>
-            <div className="block-content">
-              <span className="block-title">{schedule.title}</span>
-              <span className="block-time">{format(new Date(schedule.start_time), 'h:mm a')}</span>
-            </div>
+            <span className="chip-title">{schedule.title}</span>
           </div>
         ))}
         {daySchedules.length > 3 && (
-          <div className="more-count">외 {daySchedules.length - 3}개 더보기</div>
+          <div className="more-count">+{daySchedules.length - 3}</div>
         )}
       </div>
     );
@@ -82,8 +86,8 @@ export default function MonthView({ currentDate }: MonthViewProps) {
   return (
     <div className="month-view-container">
       <div className="weekdays-row">
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d, i) => (
-          <div key={d} className={`weekday-label ${i === 0 ? 'sun' : i === 6 ? 'sat' : ''}`}>{d}</div>
+        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d, i) => (
+          <div key={d} className="weekday-label">{d}</div>
         ))}
       </div>
 
@@ -109,47 +113,43 @@ export default function MonthView({ currentDate }: MonthViewProps) {
                     display: flex;
                     flex-direction: column;
                     height: 100%;
-                    background: var(--bg-base);
+                    background: white;
                 }
 
                 .weekdays-row {
                     display: grid;
                     grid-template-columns: repeat(7, 1fr);
-                    padding: 8px 0;
-                    border-bottom: 1px solid var(--border-subtle);
+                    padding: 12px 0;
+                    border-bottom: 1px solid #F1F5F9;
                 }
 
                 .weekday-label {
                     text-align: center;
-                    font-size: 11px;
-                    color: var(--text-muted);
+                    font-size: 13px;
+                    color: #94A3B8;
                     font-weight: 500;
-                    text-transform: uppercase;
                 }
-
-                .weekday-label.sun { color: #EF4444; }
-                .weekday-label.sat { color: #3B82F6; }
 
                 .calendar-grid {
                     display: grid;
                     grid-template-columns: repeat(7, 1fr);
-                    grid-auto-rows: minmax(100px, 1fr);
+                    grid-auto-rows: minmax(110px, 1fr);
                     flex: 1;
                 }
 
                 .calendar-cell {
-                    border-right: 1px solid var(--border-subtle);
-                    border-bottom: 1px solid var(--border-subtle);
-                    padding: 6px;
+                    border-right: 1px solid #F1F5F9;
+                    border-bottom: 1px solid #F1F5F9;
+                    padding: 8px;
                     display: flex;
                     flex-direction: column;
                     gap: 4px;
                     cursor: pointer;
-                    transition: background 0.15s;
+                    transition: background 0.1s;
                 }
 
                 .calendar-cell:hover {
-                    background: var(--bg-surface);
+                    background: #F8FAFC;
                 }
                 
                 .calendar-cell:nth-child(7n) {
@@ -157,102 +157,75 @@ export default function MonthView({ currentDate }: MonthViewProps) {
                 }
 
                 .calendar-cell.other-month {
-                    background: #F8FAFC;
+                    background: #FAFAFA;
                 }
                 
-                .calendar-cell.other-month .day-number,
-                .calendar-cell.other-month .day-schedules {
-                    opacity: 0.4;
+                .calendar-cell.other-month .day-number {
+                    color: #CBD5E1;
                 }
 
                 .day-number {
-                    font-size: 13px;
-                    font-weight: 600;
-                    color: var(--text-secondary);
+                    font-size: 15px;
+                    font-weight: 500;
+                    color: #1A1A1A;
                     margin-bottom: 4px;
-                }
-
-                .calendar-cell.today .day-number {
-                    background: var(--accent-primary);
-                    color: white;
-                    width: 22px;
-                    height: 22px;
+                    width: 28px;
+                    height: 28px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    border-radius: 50%;
+                }
+
+                .calendar-cell.today .day-number {
+                    background: #1C1C1E;
+                    color: white;
+                    border-radius: 8px;
+                    font-weight: 600;
                 }
 
                 .day-schedules {
                     display: flex;
                     flex-direction: column;
-                    gap: 6px;
+                    gap: 3px;
+                    margin-top: 4px;
                 }
 
-                .schedule-block {
+                .schedule-chip {
                     display: flex;
                     align-items: center;
-                    gap: 8px;
-                    padding: 8px;
-                    border-radius: 8px;
-                    transition: transform 0.1s;
-                    cursor: pointer;
-                }
-
-                .schedule-block:active {
-                    transform: scale(0.95);
-                }
-
-                .block-icon {
-                    flex-shrink: 0;
-                }
-
-                .block-content {
-                    display: flex;
-                    flex-direction: column;
-                    overflow: hidden;
-                }
-
-                .block-title {
+                    padding: 2px 6px;
+                    border-radius: 6px;
                     font-size: 11px;
-                    font-weight: 700;
+                    font-weight: 600;
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
+                    transition: all 0.2s;
+                    color: white;
                 }
 
-                .block-time {
-                    font-size: 9px;
-                    font-weight: 500;
-                    opacity: 0.8;
+                .schedule-chip:hover {
+                    opacity: 0.9;
+                    transform: translateX(1px);
                 }
 
-                /* Blocks Colors (Reference Image Style) */
-                .schedule-block.meeting {
-                    background: #3B82F6;
-                    color: white;
+                .chip-title {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
                 }
-                .schedule-block.appointment {
-                    background: #EF4444;
-                    color: white;
-                }
-                .schedule-block.important {
-                    background: #10B981;
-                    color: white;
-                }
-                .schedule-block.default {
-                    background: #94A3B8;
-                    color: white;
-                }
+
+                /* Blocks Colors */
+                .schedule-chip.meeting { background: #1C1C1E; }
+                .schedule-chip.appointment { background: #EF4444; }
+                .schedule-chip.important { background: #10B981; }
+                .schedule-chip.default { background: #94A3B8; }
 
                 .more-count {
                     font-size: 10px;
-                    font-weight: 600;
-                    color: var(--text-muted);
-                    padding: 2px 4px;
-                    background: var(--bg-surface);
-                    border-radius: 4px;
-                    width: fit-content;
+                    font-weight: 700;
+                    color: #94A3B8;
+                    padding-left: 4px;
                 }
             `}</style>
     </div>

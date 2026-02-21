@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { format, addMonths, subMonths, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import ScheduleModal from '@/components/schedule/ScheduleModal';
+import DatePickerModal from './DatePickerModal';
 
 function NavContent({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -19,7 +20,7 @@ function NavContent({ children }: { children: React.ReactNode }) {
     const view = pathname.split('/').pop() || 'month';
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isViewDropdownOpen, setIsViewDropdownOpen] = useState(false);
+    const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [isFilterOn, setIsFilterOn] = useState(filterParam);
     const [editingData, setEditingData] = useState<any>(null);
     const [initialTimes, setInitialTimes] = useState<{ start: string; end: string } | null>(null);
@@ -37,7 +38,7 @@ function NavContent({ children }: { children: React.ReactNode }) {
 
         const handleCreateSchedule = (e: any) => {
             setEditingData(null);
-            setInitialTimes(e.detail); // { start: 'HH:mm', end: 'HH:mm' }
+            setInitialTimes(e.detail);
             setIsModalOpen(true);
         };
 
@@ -144,48 +145,67 @@ function NavContent({ children }: { children: React.ReactNode }) {
         day: '일간 보기'
     };
 
+    const getDateLabel = () => {
+        if (view === 'month') {
+            return format(currentDate, 'yyyy년 M월', { locale: ko });
+        } else if (view === 'week') {
+            const start = new Date(currentDate.getTime() - currentDate.getDay() * 24 * 60 * 60 * 1000);
+            const end = new Date(start.getTime() + 6 * 24 * 60 * 60 * 1000);
+            return `${format(start, 'M월 d일')} - ${format(end, 'M월 d일')}`;
+        } else {
+            return format(currentDate, 'yyyy년 M월 d일 (E)', { locale: ko });
+        }
+    };
+
     const isFullPage = pathname === '/calendar/profile' || pathname === '/calendar/tasks';
 
     return (
         <div className="calendar-root">
             {!isFullPage && (
                 <header className="new-header">
-                    <div className="header-top">
-                        <h1 className="title-month">
-                            {format(currentDate, 'MMMM yyyy', { locale: ko })}
-                        </h1>
-                        <div className="nav-controls">
-                            <button onClick={handlePrev} className="icon-btn-subtle"><ChevronLeft size={20} /></button>
-                            <button onClick={handleNext} className="icon-btn-subtle"><ChevronRight size={20} /></button>
+                    <div className="header-top-centered">
+                        <button onClick={handlePrev} className="nav-arrow-btn">
+                            <ChevronLeft size={24} />
+                        </button>
+                        <button
+                            className="display-date-btn"
+                            onClick={() => setIsDatePickerOpen(true)}
+                        >
+                            <h1 className="display-date">
+                                {getDateLabel()}
+                            </h1>
+                        </button>
+                        <button onClick={handleNext} className="nav-arrow-btn">
+                            <ChevronRight size={24} />
+                        </button>
+                    </div>
+
+                    <div className="header-bottom-centered">
+                        <div className="view-toggle-segment">
+                            {(['month', 'week', 'day'] as const).map((v) => {
+                                // For week and day, always go to Today. For month, keep current context.
+                                const targetDate = (v === 'week' || v === 'day') ? new Date() : currentDate;
+                                return (
+                                    <Link
+                                        key={v}
+                                        href={`/calendar/${v}?date=${format(targetDate, 'yyyy-MM-dd')}`}
+                                        className={`segment-btn ${view === v ? 'active' : ''}`}
+                                    >
+                                        {viewLabels[v].replace(' 보기', '')}
+                                    </Link>
+                                );
+                            })}
                         </div>
                     </div>
 
-                    <div className="header-bottom">
-                        <div className="view-selector-container">
-                            <button
-                                className="view-selector-btn"
-                                onClick={() => setIsViewDropdownOpen(!isViewDropdownOpen)}
-                            >
-                                {viewLabels[view]} <ChevronDown size={14} />
-                            </button>
-                            {isViewDropdownOpen && (
-                                <div className="view-dropdown shadow-lg">
-                                    <Link onClick={() => setIsViewDropdownOpen(false)} href={`/calendar/month?date=${format(currentDate, 'yyyy-MM-dd')}`}>월간</Link>
-                                    <Link onClick={() => setIsViewDropdownOpen(false)} href={`/calendar/week?date=${format(currentDate, 'yyyy-MM-dd')}`}>주간</Link>
-                                    <Link onClick={() => setIsViewDropdownOpen(false)} href={`/calendar/day?date=${format(currentDate, 'yyyy-MM-dd')}`}>일간</Link>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="filter-toggle">
-                            <span className="filter-label">약속/회의만 보기</span>
-                            <button
-                                className={`toggle-switch ${isFilterOn ? 'on' : ''}`}
-                                onClick={toggleFilter}
-                            >
-                                <span className="toggle-thumb" />
-                            </button>
-                        </div>
+                    <div className="filter-toggle">
+                        <span className="filter-label">약속/회의만 보기</span>
+                        <button
+                            className={`toggle-switch ${isFilterOn ? 'on' : ''}`}
+                            onClick={toggleFilter}
+                        >
+                            <span className="toggle-thumb" />
+                        </button>
                     </div>
                 </header>
             )}
@@ -219,6 +239,13 @@ function NavContent({ children }: { children: React.ReactNode }) {
                 initialEndTime={initialTimes?.end}
             />
 
+            <DatePickerModal
+                isOpen={isDatePickerOpen}
+                currentDate={currentDate}
+                onClose={() => setIsDatePickerOpen(false)}
+                onSelect={(date) => updateParams(date)}
+            />
+
             <style jsx>{`
                 .calendar-root {
                     display: flex;
@@ -236,85 +263,101 @@ function NavContent({ children }: { children: React.ReactNode }) {
                     z-index: 50;
                 }
 
-                .header-top {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 20px;
-                }
-
-                .title-month {
-                    font-size: 24px;
-                    font-weight: 700;
-                    color: var(--text-primary);
-                }
-
-                .nav-controls {
-                    display: flex;
-                    gap: 12px;
-                }
-
-                .icon-btn-subtle {
-                    width: 32px;
-                    height: 32px;
+                .header-top-centered {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    border-radius: 50%;
-                    color: var(--text-secondary);
+                    gap: 16px;
+                    margin-bottom: 24px;
+                }
+
+                .display-date-btn {
+                    background: transparent;
+                    border: none;
+                    padding: 4px 12px;
+                    border-radius: 12px;
                     transition: all 0.2s;
+                    cursor: pointer;
                 }
 
-                .icon-btn-subtle:active {
+                .display-date-btn:hover {
                     background: var(--bg-surface);
-                    transform: scale(0.9);
+                    transform: translateY(-1px);
                 }
 
-                .header-bottom {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
+                .display-date-btn:active {
+                    transform: translateY(0);
+                    opacity: 0.7;
                 }
 
-                .view-selector-container {
-                    position: relative;
-                }
-
-                .view-selector-btn {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    font-size: 15px;
-                    font-weight: 600;
+                .display-date {
+                    font-size: 20px;
+                    font-weight: 800;
                     color: var(--text-primary);
-                    padding: 4px 0;
+                    min-width: 140px;
+                    text-align: center;
+                    letter-spacing: -0.02em;
+                    margin: 0;
                 }
 
-                .view-dropdown {
-                    position: absolute;
-                    top: 100%;
-                    left: 0;
-                    background: var(--bg-elevated);
+                .nav-arrow-btn {
+                    width: 40px;
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 12px;
+                    color: var(--text-secondary);
+                    background: var(--bg-surface);
                     border: 1px solid var(--border-subtle);
-                    border-radius: var(--radius-md);
-                    padding: 8px;
-                    min-width: 120px;
-                    margin-top: 8px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 2px;
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
                 }
 
-                .view-dropdown :global(a) {
-                    padding: 10px 12px;
-                    font-size: 14px;
-                    border-radius: var(--radius-sm);
-                    color: var(--text-primary);
-                    transition: background 0.2s;
+                .nav-arrow-btn:hover {
+                    background: var(--bg-base);
+                    border-color: var(--accent-primary);
+                    color: var(--accent-primary);
+                    transform: translateY(-1px);
                 }
 
-                .view-dropdown :global(a:hover) {
+                .nav-arrow-btn:active {
+                    transform: translateY(1px);
                     background: var(--bg-surface);
+                }
+
+                .header-bottom-centered {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    margin-top: 4px;
+                }
+
+                .view-toggle-segment {
+                    display: flex;
+                    background: var(--bg-surface);
+                    padding: 4px;
+                    border-radius: 14px;
+                    border: 1px solid var(--border-subtle);
+                    width: 100%;
+                    max-width: 280px;
+                }
+
+                .segment-btn {
+                    flex: 1;
+                    padding: 8px 0;
+                    font-size: 14px;
+                    font-weight: 700;
+                    color: var(--text-muted);
+                    text-align: center;
+                    border-radius: 10px;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    text-decoration: none !important;
+                }
+
+                .segment-btn.active {
+                    background: white;
+                    color: var(--accent-primary);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
                 }
 
                 .filter-toggle {
@@ -379,7 +422,7 @@ function NavContent({ children }: { children: React.ReactNode }) {
                     border: none;
                 }
             `}</style>
-        </div>
+        </div >
     );
 }
 

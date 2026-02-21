@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { X, Clock, Calendar as CalendarIcon, RotateCcw, Check } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { getTimeSlots, getTimeSlotDate } from '@/utils/dateUtils';
+import DatePickerModal from '@/components/calendar/DatePickerModal';
 
 interface ScheduleModalProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ export default function ScheduleModal({
   const [recurringConfig, setRecurringConfig] = useState<any>({ type: 'weekly', days: [1] });
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   useEffect(() => {
     if (initialData && isOpen) {
@@ -223,7 +225,12 @@ export default function ScheduleModal({
           <div className="time-config">
             <div className="time-row">
               <CalendarIcon size={18} />
-              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+              <button
+                className="custom-date-picker-btn"
+                onClick={() => setIsDatePickerOpen(true)}
+              >
+                {format(parseISO(date), 'yyyy년 MM월 dd일')}
+              </button>
             </div>
             <div className="time-row">
               <Clock size={18} />
@@ -273,6 +280,13 @@ export default function ScheduleModal({
             {loading ? '저장 중...' : '저장하기'}
           </button>
         </footer>
+
+        <DatePickerModal
+          isOpen={isDatePickerOpen}
+          currentDate={parseISO(date)}
+          onClose={() => setIsDatePickerOpen(false)}
+          onSelect={(d) => setDate(format(d, 'yyyy-MM-dd'))}
+        />
       </div>
 
       <style jsx>{`
@@ -420,12 +434,21 @@ export default function ScheduleModal({
                     color: var(--accent-primary);
                 }
 
-                .time-row input[type="date"] {
+                .custom-date-picker-btn {
                     background: none;
                     border: none;
                     font-size: 15px;
                     font-weight: 600;
                     color: var(--text-primary);
+                    padding: 4px 8px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                    text-align: left;
+                }
+
+                .custom-date-picker-btn:hover {
+                    background: #F1F5F9;
                 }
 
                 .time-selects {

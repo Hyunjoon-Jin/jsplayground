@@ -14,7 +14,7 @@ import {
 import { ko } from 'date-fns/locale';
 import { getTimeSlots } from '@/utils/dateUtils';
 import { useSchedules } from '@/hooks/useSchedules';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 
 interface WeekViewProps {
@@ -31,6 +31,16 @@ export default function WeekView({ currentDate }: WeekViewProps) {
     const end = endOfWeek(currentDate);
     return eachDayOfInterval({ start, end });
   }, [currentDate]);
+
+  // Real-time current time for indicator
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date());
+    }, 60000); // Update every minute
+    return () => clearInterval(timer);
+  }, []);
 
   const { schedules, loading } = useSchedules(currentDate, 'week');
   const timeSlots = getTimeSlots();
@@ -171,6 +181,15 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                   <div key={h} className="hour-marker" />
                 ))}
 
+                {isSameDay(day, new Date()) && (
+                  <div
+                    className="current-time-line"
+                    style={{ top: `${(now.getHours() * 60 + now.getMinutes()) * (70 / 60)}px` }}
+                  >
+                    <div className="time-dot" />
+                  </div>
+                )}
+
                 {daySchedules.map(schedule => {
                   const { top, height } = getPosition(schedule.start_time, schedule.end_time);
                   return (
@@ -294,6 +313,28 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                 .hour-marker {
                     height: 70px;
                     border-bottom: 1px solid var(--border-subtle);
+                }
+
+                .current-time-line {
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    height: 2px;
+                    background: #EF4444;
+                    z-index: 10;
+                    pointer-events: none;
+                }
+
+                .time-dot {
+                    position: absolute;
+                    left: -4px;
+                    top: -4px;
+                    width: 10px;
+                    height: 10px;
+                    background: #EF4444;
+                    border-radius: 50%;
+                    border: 2px solid white;
+                    box-shadow: 0 0 4px rgba(0,0,0,0.2);
                 }
 
                 .week-schedule-block {

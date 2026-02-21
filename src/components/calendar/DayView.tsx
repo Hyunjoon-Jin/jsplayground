@@ -32,9 +32,18 @@ export default function DayView({ currentDate }: DayViewProps) {
   const [tempHeight, setTempHeight] = useState<number>(0);
   const resizeStartRef = useRef<{ y: number; height: number; schedule: any } | null>(null);
 
+  // Real-time current time for indicator
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date());
+    }, 60000); // Update every minute
+    return () => clearInterval(timer);
+  }, []);
+
   useEffect(() => {
     if (scrollRef.current && isSameDay(currentDate, new Date())) {
-      const now = new Date();
       const minutes = (now.getHours() * 60 + now.getMinutes()) * (70 / 60);
       scrollRef.current.scrollTop = minutes - 100;
     }
@@ -226,7 +235,7 @@ export default function DayView({ currentDate }: DayViewProps) {
             {isSameDay(currentDate, new Date()) && (
               <div
                 className="current-time-line"
-                style={{ top: `${(new Date().getHours() * 60 + new Date().getMinutes()) * (70 / 60)}px` }}
+                style={{ top: `${(now.getHours() * 60 + now.getMinutes()) * (70 / 60)}px` }}
               >
                 <div className="time-dot" />
               </div>
