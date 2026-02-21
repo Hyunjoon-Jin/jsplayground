@@ -10,7 +10,6 @@ export default function BottomNav() {
   const navItems = [
     { icon: Calendar, label: '캘린더', path: '/calendar/month' },
     { icon: ClipboardList, label: '일정관리', path: '/calendar/tasks' },
-    { icon: Search, label: '검색', path: '/calendar/tasks' }, // Integrated with tasks
     { icon: User, label: '프로필', path: '/calendar/profile' },
   ];
 
