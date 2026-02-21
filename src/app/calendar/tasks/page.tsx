@@ -95,30 +95,38 @@ export default function TasksPage() {
         return <div className="loading">데이터를 불러오는 중...</div>;
     }
 
-    const SummaryCard = ({ title, count, items, type }: { title: string, count: number, items: any[], type: string }) => {
+    const SummaryCard = ({ title, count, items, type, icon: Icon, color }: { title: string, count: number, items: any[], type: string, icon: any, color: string }) => {
         const isActive = selectedDateRange === type;
         return (
             <div
-                className={`summary-card shadow-sm ${isActive ? 'active' : ''}`}
+                className={`summary-card-modern ${type} ${isActive ? 'active' : ''}`}
                 onClick={() => setSelectedDateRange(isActive ? 'all' : type as any)}
             >
-                <div className="card-header">
-                    <span className="card-title">{title}</span>
-                    <span className="card-count">{count}</span>
+                <div className="card-top">
+                    <div className="icon-badge" style={{ backgroundColor: `${color}15`, color }}>
+                        <Icon size={18} />
+                    </div>
+                    <span className="card-label">{title}</span>
                 </div>
-                <div className="card-preview">
+
+                <div className="card-main">
+                    <span className="count-value" style={{ color }}>{count}</span>
+                    <span className="count-unit">개</span>
+                </div>
+
+                <div className="card-footer">
                     {items.length > 0 ? (
-                        items.slice(0, 2).map((s, i) => (
-                            <div key={i} className="preview-item">
-                                <div className="dot" />
-                                <span className="preview-text">{s.title}</span>
-                            </div>
-                        ))
+                        <div className="mini-list">
+                            {items.slice(0, 1).map((s, i) => (
+                                <span key={i} className="list-item-text">{s.title}</span>
+                            ))}
+                            {items.length > 1 && <span className="more-text">외 {items.length - 1}개...</span>}
+                        </div>
                     ) : (
-                        <span className="empty-text">일정 없음</span>
+                        <span className="no-schedules">일정 없음</span>
                     )}
                 </div>
-                {isActive && <div className="active-indicator" />}
+                {isActive && <div className="active-glow" style={{ backgroundColor: color }} />}
             </div>
         );
     };
@@ -128,24 +136,30 @@ export default function TasksPage() {
             <header className="tasks-header">
                 <h1 className="page-title">모든 일정 내역</h1>
 
-                <div className="summary-section">
+                <div className="summary-section-modern">
                     <SummaryCard
                         title="어제"
                         count={dateTiers.yesterday.length}
                         items={dateTiers.yesterday}
                         type="yesterday"
+                        icon={require('lucide-react').History}
+                        color="#64748B"
                     />
                     <SummaryCard
                         title="오늘"
                         count={dateTiers.today.length}
                         items={dateTiers.today}
                         type="today"
+                        icon={require('lucide-react').Target}
+                        color="#3B82F6"
                     />
                     <SummaryCard
                         title="내일"
                         count={dateTiers.tomorrow.length}
                         items={dateTiers.tomorrow}
                         type="tomorrow"
+                        icon={require('lucide-react').Zap}
+                        color="#10B981"
                     />
                 </div>
 
@@ -278,98 +292,117 @@ export default function TasksPage() {
                     margin-bottom: 24px;
                 }
 
-                .summary-section {
+                .summary-section-modern {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
-                    gap: 12px;
-                    margin-bottom: 24px;
+                    gap: 16px;
+                    margin-bottom: 32px;
                 }
 
-                .summary-card {
+                .summary-card-modern {
                     background: white;
-                    padding: 16px;
-                    border-radius: 18px;
+                    border-radius: 24px;
+                    padding: 20px;
                     border: 1px solid #F1F5F9;
-                    position: relative;
-                    transition: all 0.2s;
-                    cursor: pointer;
                     display: flex;
                     flex-direction: column;
-                    gap: 10px;
-                    min-height: 100px;
+                    gap: 12px;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    cursor: pointer;
+                    position: relative;
+                    overflow: hidden;
                 }
 
-                .summary-card:hover {
-                    transform: translateY(-2px);
-                    border-color: #3B82F620;
+                .summary-card-modern:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+                    border-color: #E2E8F0;
                 }
 
-                .summary-card.active {
-                    background: #3B82F605;
-                    border-color: #3B82F650;
-                    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+                .summary-card-modern.active {
+                    background: #F8FAFC;
+                    border-color: #CBD5E1;
                 }
 
-                .card-header {
+                .card-top {
                     display: flex;
-                    justify-content: space-between;
                     align-items: center;
+                    gap: 10px;
                 }
 
-                .card-title {
-                    font-size: 13px;
+                .icon-badge {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .card-label {
+                    font-size: 14px;
                     font-weight: 700;
                     color: #64748B;
                 }
 
-                .card-count {
-                    font-size: 15px;
-                    font-weight: 800;
-                    color: #3B82F6;
+                .card-main {
+                    display: flex;
+                    align-items: baseline;
+                    gap: 2px;
                 }
 
-                .card-preview {
+                .count-value {
+                    font-size: 32px;
+                    font-weight: 900;
+                    line-height: 1;
+                }
+
+                .count-unit {
+                    font-size: 13px;
+                    font-weight: 700;
+                    color: #94A3B8;
+                }
+
+                .card-footer {
+                    margin-top: auto;
+                    border-top: 1px solid #F1F5F9;
+                    padding-top: 10px;
+                }
+
+                .mini-list {
                     display: flex;
                     flex-direction: column;
-                    gap: 4px;
+                    gap: 2px;
                 }
 
-                .preview-item {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                }
-
-                .dot {
-                    width: 4px;
-                    height: 4px;
-                    background: #CBD5E1;
-                    border-radius: 50%;
-                }
-
-                .preview-text {
-                    font-size: 11px;
+                .list-item-text {
+                    font-size: 12px;
+                    font-weight: 600;
                     color: #475569;
-                    font-weight: 500;
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
                 }
 
-                .empty-text {
+                .more-text {
                     font-size: 11px;
+                    font-weight: 600;
                     color: #94A3B8;
+                }
+
+                .no-schedules {
+                    font-size: 12px;
+                    color: #CBD5E1;
                     font-style: italic;
                 }
 
-                .active-indicator {
+                .active-glow {
                     position: absolute;
                     bottom: 0;
-                    left: 20%;
-                    right: 20%;
-                    height: 3px;
-                    background: #3B82F6;
-                    border-radius: 10px 10px 0 0;
+                    left: 0;
+                    right: 0;
+                    height: 4px;
+                    opacity: 0.6;
                 }
 
                 .active-filter-bar {
