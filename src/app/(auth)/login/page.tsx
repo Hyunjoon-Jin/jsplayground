@@ -6,75 +6,75 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function LoginPage() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-        if (error) {
-            setError(error.message);
-            setLoading(false);
-        } else {
-            router.push('/calendar');
-            router.refresh();
-        }
-    };
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else {
+      router.push('/calendar/month');
+      router.refresh();
+    }
+  };
 
-    return (
-        <div className="auth-container">
-            <div className="auth-card glass">
-                <h1 className="auth-title">Welcome Back</h1>
-                <p className="auth-subtitle">Sign in to manage your schedule</p>
+  return (
+    <div className="auth-container">
+      <div className="auth-card glass">
+        <h1 className="auth-title">Welcome Back</h1>
+        <p className="auth-subtitle">Sign in to manage your schedule</p>
 
-                <form onSubmit={handleLogin} className="auth-form">
-                    <div className="form-group">
-                        <label htmlFor="email">Email</label>
-                        <input
-                            id="email"
-                            type="email"
-                            placeholder="name@example.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                    </div>
+        <form onSubmit={handleLogin} className="auth-form">
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="name@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
-                    <div className="form-group">
-                        <label htmlFor="password">Password</label>
-                        <input
-                            id="password"
-                            type="password"
-                            placeholder="••••••••"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
-                    {error && <div className="error-message">{error}</div>}
+          {error && <div className="error-message">{error}</div>}
 
-                    <button type="submit" className="auth-button shadow-glow" disabled={loading}>
-                        {loading ? 'Signing in...' : 'Sign In'}
-                    </button>
-                </form>
+          <button type="submit" className="auth-button shadow-glow" disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
 
-                <p className="auth-footer">
-                    Don&apos;t have an account? <Link href="/register">Sign up</Link>
-                </p>
-            </div>
+        <p className="auth-footer">
+          Don&apos;t have an account? <Link href="/register">Sign up</Link>
+        </p>
+      </div>
 
-            <style jsx>{`
+      <style jsx>{`
         .auth-container {
           min-height: 100vh;
           display: flex;
@@ -193,6 +193,6 @@ export default function LoginPage() {
           text-decoration: underline;
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }
