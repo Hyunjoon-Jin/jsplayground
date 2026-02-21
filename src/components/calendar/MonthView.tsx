@@ -8,7 +8,7 @@ import {
 import { ko } from 'date-fns/locale';
 import { getMonthGrid } from '@/utils/dateUtils';
 import { useSchedules } from '@/hooks/useSchedules';
-import { Handshake, Megaphone, Star, Bell, Calendar as CalIcon } from 'lucide-react';
+import { Handshake, Star, Calendar as CalIcon } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
 interface MonthViewProps {
@@ -23,15 +23,16 @@ export default function MonthView({ currentDate }: MonthViewProps) {
   const { schedules, loading } = useSchedules(currentDate, 'month');
 
   const getIcon = (schedule: any) => {
-    if (schedule.is_meeting) return <Handshake size={14} />;
+    const workTypes = ['미팅', '회의', '업무보고'];
+    if (schedule.is_meeting || workTypes.includes(schedule.type)) return <Handshake size={14} />;
     if (schedule.importance === 'high') return <Star size={14} />;
-    if (schedule.type === '업무') return <Megaphone size={14} />;
     return <CalIcon size={14} />;
   };
 
   const getBadgeClass = (schedule: any) => {
-    if (schedule.is_meeting) return 'meeting';
-    if (schedule.is_appointment) return 'appointment';
+    const workTypes = ['미팅', '회의', '업무보고'];
+    if (schedule.is_meeting || workTypes.includes(schedule.type)) return 'meeting';
+    if (schedule.is_appointment || schedule.type === '약속') return 'appointment';
     if (schedule.importance === 'high') return 'important';
     return 'default';
   };
@@ -175,6 +176,7 @@ export default function MonthView({ currentDate }: MonthViewProps) {
                     padding: 8px;
                     border-radius: 8px;
                     transition: transform 0.1s;
+                    cursor: pointer;
                 }
 
                 .schedule-block:active {

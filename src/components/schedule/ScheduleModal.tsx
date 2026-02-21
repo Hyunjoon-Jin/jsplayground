@@ -15,7 +15,7 @@ interface ScheduleModalProps {
 export default function ScheduleModal({ isOpen, onClose, onSave, initialDate }: ScheduleModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [type, setType] = useState<any>('업무');
+  const [type, setType] = useState<any>('미팅');
   const [importance, setImportance] = useState<any>('medium');
   const [isAppointment, setIsAppointment] = useState(false);
   const [isMeeting, setIsMeeting] = useState(false);
