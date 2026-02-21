@@ -21,10 +21,21 @@ function NavContent({ children }: { children: React.ReactNode }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isViewDropdownOpen, setIsViewDropdownOpen] = useState(false);
     const [isFilterOn, setIsFilterOn] = useState(filterParam);
+    const [editingData, setEditingData] = useState<any>(null);
 
     useEffect(() => {
         setIsFilterOn(searchParams.get('filter') === 'appointment');
     }, [searchParams]);
+
+    useEffect(() => {
+        const handleEditSchedule = (e: any) => {
+            setEditingData(e.detail);
+            setIsModalOpen(true);
+        };
+
+        window.addEventListener('edit-schedule', handleEditSchedule);
+        return () => window.removeEventListener('edit-schedule', handleEditSchedule);
+    }, []);
 
     const updateParams = (newDate?: Date, filter?: boolean) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -55,6 +66,11 @@ function NavContent({ children }: { children: React.ReactNode }) {
     };
 
     const handleSave = async (data: any) => {
+        if (data.id) {
+            await handleUpdate(data);
+            return;
+        }
+
         const endpoint = data.is_recurring ? '/api/recurring' : '/api/schedules';
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -80,6 +96,32 @@ function NavContent({ children }: { children: React.ReactNode }) {
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || 'Failed to save');
+        }
+        router.refresh();
+    };
+
+    const handleUpdate = async (data: any) => {
+        const response = await fetch(`/api/schedules?id=${data.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to update');
+        }
+        router.refresh();
+    };
+
+    const handleDelete = async (id: string) => {
+        const response = await fetch(`/api/schedules?id=${id}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to delete');
         }
         router.refresh();
     };
@@ -141,16 +183,24 @@ function NavContent({ children }: { children: React.ReactNode }) {
             </main>
 
             {!isFullPage && (
-                <button className="fab-premium shadow-glow clickable" onClick={() => setIsModalOpen(true)}>
+                <button className="fab-premium shadow-glow clickable" onClick={() => {
+                    setEditingData(null);
+                    setIsModalOpen(true);
+                }}>
                     <Plus size={28} color="white" />
                 </button>
             )}
 
             <ScheduleModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setEditingData(null);
+                }}
                 onSave={handleSave}
+                onDelete={handleDelete}
                 initialDate={currentDate}
+                initialData={editingData}
             />
 
             <style jsx>{`

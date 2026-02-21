@@ -61,9 +61,13 @@ export default function TasksPage() {
         return result;
     }, [schedules, searchQuery, filterType, filterImportance, sortBy]);
 
+    const handleScheduleClick = (schedule: any) => {
+        window.dispatchEvent(new CustomEvent('edit-schedule', { detail: schedule }));
+    };
+
     const importanceLabel: any = {
         high: { text: '높음', color: '#EF4444' },
-        medium: { text: '중간', color: '#F59E0B' },
+        medium: { text: '보통', color: '#F59E0B' },
         low: { text: '낮음', color: '#10B981' }
     };
 
@@ -74,13 +78,13 @@ export default function TasksPage() {
     return (
         <div className="tasks-container">
             <header className="tasks-header">
-                <h1 className="page-title">일정 통합 관리</h1>
+                <h1 className="page-title">모든 일정 내역</h1>
 
                 <div className="search-bar-container shadow-sm">
                     <SearchIcon size={18} className="search-icon" />
                     <input
                         type="text"
-                        placeholder="일정 제목이나 내용을 검색하세요"
+                        placeholder="일정 제목이나 내용을 검색해보세요"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -140,7 +144,7 @@ export default function TasksPage() {
             <main className="tasks-list">
                 {filteredAndSortedSchedules.length > 0 ? (
                     filteredAndSortedSchedules.map(item => (
-                        <div key={item.id} className="task-item shadow-sm">
+                        <div key={item.id} className="task-item shadow-sm clickable" onClick={() => handleScheduleClick(item)}>
                             <div className="task-main">
                                 <div className="task-date-info">
                                     <span className="task-date">{format(parseISO(item.start_time), 'yyyy.MM.dd (eee)', { locale: ko })}</span>

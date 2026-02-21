@@ -53,6 +53,11 @@ export default function WeekView({ currentDate }: WeekViewProps) {
     return 'default';
   };
 
+  const handleScheduleClick = (schedule: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.dispatchEvent(new CustomEvent('edit-schedule', { detail: schedule }));
+  };
+
   return (
     <div className="week-view-container">
       <div className="week-tab-header">
@@ -97,8 +102,9 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                   return (
                     <div
                       key={schedule.id}
-                      className={`week-schedule-block shadow-sm ${getBadgeClass(schedule)}`}
+                      className={`week-schedule-block shadow-sm clickable ${getBadgeClass(schedule)}`}
                       style={{ top: `${top}px`, height: `${height}px` }}
+                      onClick={(e) => handleScheduleClick(schedule, e)}
                     >
                       <div className="block-title">{schedule.title}</div>
                       <div className="block-time">
@@ -220,6 +226,12 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                     display: flex;
                     flex-direction: column;
                     gap: 2px;
+                    cursor: pointer;
+                    transition: transform 0.1s;
+                }
+
+                .week-schedule-block:active {
+                    transform: scale(0.98);
                 }
 
                 .block-title {

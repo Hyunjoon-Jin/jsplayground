@@ -48,6 +48,11 @@ export default function DayView({ currentDate }: DayViewProps) {
     return 'default';
   };
 
+  const handleScheduleClick = (schedule: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.dispatchEvent(new CustomEvent('edit-schedule', { detail: schedule }));
+  };
+
   let daySchedules = schedules;
   if (isFilterOn) {
     daySchedules = daySchedules.filter(s => s.is_appointment || s.is_meeting);
@@ -89,8 +94,9 @@ export default function DayView({ currentDate }: DayViewProps) {
               return (
                 <div
                   key={schedule.id}
-                  className={`day-schedule-card shadow-md ${getBadgeClass(schedule)}`}
+                  className={`day-schedule-card shadow-md clickable ${getBadgeClass(schedule)}`}
                   style={{ top: `${top}px`, height: `${height}px` }}
+                  onClick={(e) => handleScheduleClick(schedule, e)}
                 >
                   <div className="card-top">
                     <span className="card-title">{schedule.title}</span>
@@ -208,6 +214,7 @@ export default function DayView({ currentDate }: DayViewProps) {
                     gap: 6px;
                     overflow: hidden;
                     transition: transform 0.2s;
+                    cursor: pointer;
                 }
 
                 .day-schedule-card:active {

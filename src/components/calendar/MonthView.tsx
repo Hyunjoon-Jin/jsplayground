@@ -37,6 +37,11 @@ export default function MonthView({ currentDate }: MonthViewProps) {
     return 'default';
   };
 
+  const handleScheduleClick = (schedule: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.dispatchEvent(new CustomEvent('edit-schedule', { detail: schedule }));
+  };
+
   const renderSchedules = (day: Date) => {
     let daySchedules = schedules.filter(s => isSameDay(new Date(s.start_time), day));
 
@@ -51,6 +56,7 @@ export default function MonthView({ currentDate }: MonthViewProps) {
             key={schedule.id}
             className={`schedule-block ${getBadgeClass(schedule)}`}
             title={schedule.title}
+            onClick={(e) => handleScheduleClick(schedule, e)}
           >
             <div className="block-icon">{getIcon(schedule)}</div>
             <div className="block-content">

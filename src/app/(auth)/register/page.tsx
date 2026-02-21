@@ -10,9 +10,6 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [fullName, setFullName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [birthDate, setBirthDate] = useState('');
-  const [gender, setGender] = useState('male');
 
   // Status states
   const [isEmailChecked, setIsEmailChecked] = useState(false);
@@ -82,9 +79,6 @@ export default function RegisterPage() {
         emailRedirectTo: `${window.location.origin}/auth/callback?next=/login`,
         data: {
           full_name: fullName,
-          phone_number: phoneNumber,
-          birth_date: birthDate,
-          gender: gender
         },
       },
     });
@@ -167,39 +161,6 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="phoneNumber">휴대폰 번호</label>
-              <input
-                id="phoneNumber"
-                type="tel"
-                placeholder="010-0000-0000"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="gender">성별</label>
-              <select id="gender" value={gender} onChange={(e) => setGender(e.target.value)}>
-                <option value="male">남성</option>
-                <option value="female">여성</option>
-                <option value="other">기타</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="birthDate">생년월일</label>
-            <input
-              id="birthDate"
-              type="date"
-              value={birthDate}
-              onChange={(e) => setBirthDate(e.target.value)}
-              required
-            />
-          </div>
-
           <div className="agreement-section">
             <div className="agreement-box">
               <label className="agreement-title">개인정보 수집 및 이용 동의 (필수)</label>
@@ -207,7 +168,7 @@ export default function RegisterPage() {
                 {`본 서비스(Life Controller)는 회원님의 개인정보를 안전하게 처리하며, 관련 법령을 준수합니다.
 
 1. 개인정보 수집 항목
-- 필수항목: 이름, 이메일, 비밀번호, 연락처, 생년월일, 성별
+- 필수항목: 이름, 이메일, 비밀번호
 - 자동수집항목: 서비스 이용 기록, 접속 로그, 쿠키, 접속 IP 정보
 
 2. 개인정보 수집 및 이용 목적

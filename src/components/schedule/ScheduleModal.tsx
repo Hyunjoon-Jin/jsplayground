@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Clock, Calendar as CalendarIcon, RotateCcw, Check } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { getTimeSlots, getTimeSlotDate } from '@/utils/dateUtils';
@@ -9,10 +9,12 @@ interface ScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: any) => Promise<void>;
+  onDelete?: (id: string) => Promise<void>;
   initialDate?: Date;
+  initialData?: any;
 }
 
-export default function ScheduleModal({ isOpen, onClose, onSave, initialDate }: ScheduleModalProps) {
+export default function ScheduleModal({ isOpen, onClose, onSave, onDelete, initialDate, initialData }: ScheduleModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<any>('미팅');
@@ -25,6 +27,37 @@ export default function ScheduleModal({ isOpen, onClose, onSave, initialDate }: 
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurringConfig, setRecurringConfig] = useState<any>({ type: 'weekly', days: [1] });
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    if (initialData && isOpen) {
+      setTitle(initialData.title || '');
+      setDescription(initialData.description || '');
+      setType(initialData.type || '미팅');
+      setImportance(initialData.importance || 'medium');
+      setIsAppointment(initialData.is_appointment || false);
+      setIsMeeting(initialData.is_meeting || false);
+
+      const start = parseISO(initialData.start_time);
+      const end = parseISO(initialData.end_time);
+      setDate(format(start, 'yyyy-MM-dd'));
+      setStartTime(format(start, 'HH:mm'));
+      setEndTime(format(end, 'HH:mm'));
+      setIsRecurring(initialData.is_recurring || false);
+    } else if (!initialData && isOpen) {
+      // Clear for new
+      setTitle('');
+      setDescription('');
+      setType('미팅');
+      setImportance('medium');
+      setIsAppointment(false);
+      setIsMeeting(false);
+      setDate(format(initialDate || new Date(), 'yyyy-MM-dd'));
+      setStartTime('09:00');
+      setEndTime('10:00');
+      setIsRecurring(false);
+    }
+  }, [initialData, isOpen, initialDate]);
 
   const timeSlots = getTimeSlots();
 
@@ -38,7 +71,7 @@ export default function ScheduleModal({ isOpen, onClose, onSave, initialDate }: 
       const start = getTimeSlotDate(parseISO(date), startTime);
       const end = getTimeSlotDate(parseISO(date), endTime);
 
-      const scheduleData = {
+      const scheduleData: any = {
         title,
         description,
         type,
@@ -50,7 +83,11 @@ export default function ScheduleModal({ isOpen, onClose, onSave, initialDate }: 
         is_recurring: isRecurring,
       };
 
-      if (isRecurring) {
+      if (initialData?.id) {
+        scheduleData.id = initialData.id;
+      }
+
+      if (isRecurring && !initialData?.id) {
         await onSave({ ...scheduleData, recurringConfig });
       } else {
         await onSave(scheduleData);
@@ -64,11 +101,27 @@ export default function ScheduleModal({ isOpen, onClose, onSave, initialDate }: 
     }
   };
 
+  const handleDelete = async () => {
+    if (!initialData?.id || !onDelete) return;
+    if (!confirm('일정을 삭제하시겠습니까?')) return;
+
+    setDeleting(true);
+    try {
+      await onDelete(initialData.id);
+      onClose();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || '삭제 중 오류가 발생했습니다.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="modal-overlay">
       <div className="modal-content animate-slide-up">
         <header className="modal-header">
-          <h2>새 일정 등록</h2>
+          <h2>{initialData ? '일정 수정' : '새 일정 등록'}</h2>
           <button onClick={onClose} className="close-btn"><X size={24} /></button>
         </header>
 
@@ -155,25 +208,33 @@ export default function ScheduleModal({ isOpen, onClose, onSave, initialDate }: 
             </div>
           </div>
 
-          <div className="recurring-section">
-            <label className="toggle-item-simple">
-              <input type="checkbox" checked={isRecurring} onChange={(e) => setIsRecurring(e.target.checked)} />
-              <span>🔁 반복 일정으로 설정</span>
-            </label>
-            {isRecurring && (
-              <div className="recurring-picker">
-                <select value={recurringConfig.type} onChange={(e) => setRecurringConfig({ ...recurringConfig, type: e.target.value })}>
-                  <option value="weekly">요일별 (매주)</option>
-                  <option value="monthly">날짜별 (매월)</option>
-                </select>
-                <p className="hint">※ 설정한 규칙에 따라 2년치 일정이 생성됩니다.</p>
-              </div>
-            )}
-          </div>
+          {!initialData && (
+            <div className="recurring-section">
+              <label className="toggle-item-simple">
+                <input type="checkbox" checked={isRecurring} onChange={(e) => setIsRecurring(e.target.checked)} />
+                <span>🔁 반복 일정으로 설정</span>
+              </label>
+              {isRecurring && (
+                <div className="recurring-picker">
+                  <select value={recurringConfig.type} onChange={(e) => setRecurringConfig({ ...recurringConfig, type: e.target.value })}>
+                    <option value="weekly">요일별 (매주)</option>
+                    <option value="monthly">날짜별 (매월)</option>
+                  </select>
+                  <p className="hint">※ 설정한 규칙에 따라 2년치 일정이 생성됩니다.</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <footer className="modal-footer">
-          <button className="cancel-btn" onClick={onClose}>취소</button>
+          {initialData ? (
+            <button className="delete-btn" onClick={handleDelete} disabled={deleting}>
+              {deleting ? '삭제 중...' : '삭제'}
+            </button>
+          ) : (
+            <button className="cancel-btn" onClick={onClose}>취소</button>
+          )}
           <button className="save-btn shadow-md" onClick={handleSave} disabled={loading}>
             {loading ? '저장 중...' : '저장하기'}
           </button>
@@ -384,6 +445,14 @@ export default function ScheduleModal({ isOpen, onClose, onSave, initialDate }: 
                     font-weight: 700;
                     color: var(--text-secondary);
                     background: #F1F5F9;
+                }
+
+                .delete-btn {
+                    padding: 16px;
+                    border-radius: 14px;
+                    font-weight: 700;
+                    color: #EF4444;
+                    background: #FEF2F2;
                 }
 
                 .save-btn {
