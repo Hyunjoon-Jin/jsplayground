@@ -22,6 +22,7 @@ function NavContent({ children }: { children: React.ReactNode }) {
     const [isViewDropdownOpen, setIsViewDropdownOpen] = useState(false);
     const [isFilterOn, setIsFilterOn] = useState(filterParam);
     const [editingData, setEditingData] = useState<any>(null);
+    const [initialTimes, setInitialTimes] = useState<{ start: string; end: string } | null>(null);
 
     useEffect(() => {
         setIsFilterOn(searchParams.get('filter') === 'appointment');
@@ -29,12 +30,23 @@ function NavContent({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         const handleEditSchedule = (e: any) => {
+            setInitialTimes(null);
             setEditingData(e.detail);
             setIsModalOpen(true);
         };
 
+        const handleCreateSchedule = (e: any) => {
+            setEditingData(null);
+            setInitialTimes(e.detail); // { start: 'HH:mm', end: 'HH:mm' }
+            setIsModalOpen(true);
+        };
+
         window.addEventListener('edit-schedule', handleEditSchedule);
-        return () => window.removeEventListener('edit-schedule', handleEditSchedule);
+        window.addEventListener('create-schedule', handleCreateSchedule);
+        return () => {
+            window.removeEventListener('edit-schedule', handleEditSchedule);
+            window.removeEventListener('create-schedule', handleCreateSchedule);
+        };
     }, []);
 
     const updateParams = (newDate?: Date, filter?: boolean) => {
@@ -185,6 +197,7 @@ function NavContent({ children }: { children: React.ReactNode }) {
             {!isFullPage && (
                 <button className="fab-premium shadow-glow clickable" onClick={() => {
                     setEditingData(null);
+                    setInitialTimes(null);
                     setIsModalOpen(true);
                 }}>
                     <Plus size={28} color="white" />
@@ -196,11 +209,14 @@ function NavContent({ children }: { children: React.ReactNode }) {
                 onClose={() => {
                     setIsModalOpen(false);
                     setEditingData(null);
+                    setInitialTimes(null);
                 }}
                 onSave={handleSave}
                 onDelete={handleDelete}
                 initialDate={currentDate}
                 initialData={editingData}
+                initialStartTime={initialTimes?.start}
+                initialEndTime={initialTimes?.end}
             />
 
             <style jsx>{`

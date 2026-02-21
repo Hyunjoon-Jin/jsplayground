@@ -5,19 +5,24 @@ import {
   startOfWeek,
   isSameDay,
   eachDayOfInterval,
-  endOfWeek
+  endOfWeek,
+  parseISO,
+  addMinutes,
+  differenceInMinutes,
+  startOfDay
 } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { getTimeSlots } from '@/utils/dateUtils';
 import { useSchedules } from '@/hooks/useSchedules';
-import { useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 interface WeekViewProps {
   currentDate: Date;
 }
 
 export default function WeekView({ currentDate }: WeekViewProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const isFilterOn = searchParams.get('filter') === 'appointment';
 
@@ -58,6 +63,66 @@ export default function WeekView({ currentDate }: WeekViewProps) {
     window.dispatchEvent(new CustomEvent('edit-schedule', { detail: schedule }));
   };
 
+  const handleDayClick = (day: Date) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('date', format(day, 'yyyy-MM-dd'));
+    router.push(`/calendar/day?${params.toString()}`);
+  };
+
+  const handleDragStart = (e: React.DragEvent, schedule: any) => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const offsetY = e.clientY - rect.top;
+
+    e.dataTransfer.setData('scheduleId', schedule.id);
+    e.dataTransfer.setData('dragOffsetY', offsetY.toString());
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = async (e: React.DragEvent, dropDay: Date) => {
+    e.preventDefault();
+    const scheduleId = e.dataTransfer.getData('scheduleId');
+    const dragOffsetY = parseFloat(e.dataTransfer.getData('dragOffsetY'));
+
+    const schedule = schedules.find(s => s.id === scheduleId);
+    if (!schedule) return;
+
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const dropY = e.clientY - rect.top - dragOffsetY;
+
+    // 70px per hour => 1min = 70/60 px => 1px = 60/70 min
+    let minutesTotal = Math.max(0, dropY * (60 / 70));
+    // Snap to 15 mins
+    minutesTotal = Math.round(minutesTotal / 15) * 15;
+
+    const originalDuration = differenceInMinutes(parseISO(schedule.end_time), parseISO(schedule.start_time));
+
+    const newStart = addMinutes(startOfDay(dropDay), minutesTotal);
+    const newEnd = addMinutes(newStart, originalDuration);
+
+    try {
+      const response = await fetch(`/api/schedules?id=${schedule.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...schedule,
+          start_time: newStart.toISOString(),
+          end_time: newEnd.toISOString()
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to update schedule');
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      alert('일정 이동 중 오류가 발생했습니다.');
+    }
+  };
+
   return (
     <div className="week-view-container">
       <div className="week-tab-header">
@@ -65,7 +130,11 @@ export default function WeekView({ currentDate }: WeekViewProps) {
         {weekDays.map(day => {
           const isToday = isSameDay(day, new Date());
           return (
-            <div key={day.toISOString()} className={`day-col-header ${isToday ? 'today' : ''}`}>
+            <div
+              key={day.toISOString()}
+              className={`day-col-header clickable ${isToday ? 'today' : ''}`}
+              onClick={() => handleDayClick(day)}
+            >
               <span className="day-name">{format(day, 'E', { locale: ko })}</span>
               <div className="day-val-circle">
                 <span>{format(day, 'd')}</span>
@@ -92,7 +161,12 @@ export default function WeekView({ currentDate }: WeekViewProps) {
             }
 
             return (
-              <div key={day.toISOString()} className="day-column">
+              <div
+                key={day.toISOString()}
+                className="day-column"
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, day)}
+              >
                 {Array.from({ length: 24 }).map((_, h) => (
                   <div key={h} className="hour-marker" />
                 ))}
@@ -105,6 +179,8 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                       className={`week-schedule-block shadow-sm clickable ${getBadgeClass(schedule)}`}
                       style={{ top: `${top}px`, height: `${height}px` }}
                       onClick={(e) => handleScheduleClick(schedule, e)}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, schedule)}
                     >
                       <div className="block-title">{schedule.title}</div>
                       <div className="block-time">
@@ -141,8 +217,15 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                     align-items: center;
                     padding: 8px 0;
                     color: var(--text-muted);
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    border-radius: 8px;
                 }
 
+                .day-col-header:hover {
+                    background: var(--bg-surface);
+                }
+                
                 .day-name {
                     font-size: 11px;
                     font-weight: 600;

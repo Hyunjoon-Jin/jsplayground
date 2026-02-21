@@ -9,13 +9,14 @@ import { ko } from 'date-fns/locale';
 import { getMonthGrid } from '@/utils/dateUtils';
 import { useSchedules } from '@/hooks/useSchedules';
 import { Handshake, Star, Calendar as CalIcon } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 interface MonthViewProps {
   currentDate: Date;
 }
 
 export default function MonthView({ currentDate }: MonthViewProps) {
+  const router = useRouter();
   const days = getMonthGrid(currentDate);
   const searchParams = useSearchParams();
   const isFilterOn = searchParams.get('filter') === 'appointment';
@@ -40,6 +41,12 @@ export default function MonthView({ currentDate }: MonthViewProps) {
   const handleScheduleClick = (schedule: any, e: React.MouseEvent) => {
     e.stopPropagation();
     window.dispatchEvent(new CustomEvent('edit-schedule', { detail: schedule }));
+  };
+
+  const handleDayClick = (day: Date) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('date', format(day, 'yyyy-MM-dd'));
+    router.push(`/calendar/day?${params.toString()}`);
   };
 
   const renderSchedules = (day: Date) => {
@@ -88,6 +95,7 @@ export default function MonthView({ currentDate }: MonthViewProps) {
             <div
               key={i}
               className={`calendar-cell ${!isCurrentMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}`}
+              onClick={() => handleDayClick(day)}
             >
               <span className="day-number">{format(day, 'd')}</span>
               {renderSchedules(day)}
@@ -136,8 +144,14 @@ export default function MonthView({ currentDate }: MonthViewProps) {
                     display: flex;
                     flex-direction: column;
                     gap: 4px;
+                    cursor: pointer;
+                    transition: background 0.15s;
                 }
 
+                .calendar-cell:hover {
+                    background: var(--bg-surface);
+                }
+                
                 .calendar-cell:nth-child(7n) {
                     border-right: none;
                 }

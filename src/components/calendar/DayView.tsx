@@ -2,25 +2,35 @@
 
 import {
   format,
-  isSameDay
+  isSameDay,
+  parseISO,
+  addMinutes,
+  differenceInMinutes,
+  startOfDay
 } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { getTimeSlots } from '@/utils/dateUtils';
 import { useSchedules } from '@/hooks/useSchedules';
-import { useEffect, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 interface DayViewProps {
   currentDate: Date;
 }
 
 export default function DayView({ currentDate }: DayViewProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const isFilterOn = searchParams.get('filter') === 'appointment';
 
   const { schedules, loading } = useSchedules(currentDate, 'day');
   const timeSlots = getTimeSlots();
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Resizing state
+  const [resizingId, setResizingId] = useState<string | null>(null);
+  const [tempHeight, setTempHeight] = useState<number>(0);
+  const resizeStartRef = useRef<{ y: number; height: number; schedule: any } | null>(null);
 
   useEffect(() => {
     if (scrollRef.current && isSameDay(currentDate, new Date())) {
@@ -53,6 +63,134 @@ export default function DayView({ currentDate }: DayViewProps) {
     window.dispatchEvent(new CustomEvent('edit-schedule', { detail: schedule }));
   };
 
+  // --- Drag to Move ---
+  const handleDragStart = (e: React.DragEvent, schedule: any) => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const offsetY = e.clientY - rect.top;
+
+    e.dataTransfer.setData('scheduleId', schedule.id);
+    e.dataTransfer.setData('dragOffsetY', offsetY.toString());
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    const scheduleId = e.dataTransfer.getData('scheduleId');
+    const dragOffsetY = parseFloat(e.dataTransfer.getData('dragOffsetY'));
+
+    const schedule = schedules.find(s => s.id === scheduleId);
+    if (!schedule) return;
+
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const dropY = e.clientY - rect.top - dragOffsetY;
+
+    // 1hr = 70px => 1min = 70/60 px => 1px = 60/70 min
+    let minutesTotal = Math.max(0, dropY * (60 / 70));
+    // Snap to 15 mins
+    minutesTotal = Math.round(minutesTotal / 15) * 15;
+
+    const originalDuration = differenceInMinutes(parseISO(schedule.end_time), parseISO(schedule.start_time));
+    const newStart = addMinutes(startOfDay(currentDate), minutesTotal);
+    const newEnd = addMinutes(newStart, originalDuration);
+
+    updateSchedule(schedule, newStart, newEnd);
+  };
+
+  // --- Drag to Resize ---
+  const handleResizeStart = (e: React.MouseEvent, schedule: any) => {
+    e.stopPropagation();
+    const { height } = getPosition(schedule.start_time, schedule.end_time);
+
+    setResizingId(schedule.id);
+    setTempHeight(height);
+    resizeStartRef.current = { y: e.clientY, height, schedule };
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      if (!resizeStartRef.current) return;
+      const deltaY = moveEvent.clientY - resizeStartRef.current.y;
+
+      // Calculate new height with 15-min snap (15 min = 17.5px)
+      let nextHeight = Math.max(17.5, resizeStartRef.current.height + deltaY);
+      nextHeight = Math.round(nextHeight / 17.5) * 17.5;
+
+      setTempHeight(nextHeight);
+    };
+
+    const onMouseUp = async () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+
+      if (resizeStartRef.current) {
+        const { schedule } = resizeStartRef.current;
+        // pixel to minutes (1px = 60/70 min)
+        const newDuration = tempHeight * (60 / 70);
+        const newEnd = addMinutes(parseISO(schedule.start_time), Math.round(newDuration));
+
+        await updateSchedule(schedule, parseISO(schedule.start_time), newEnd);
+      }
+
+      setResizingId(null);
+      resizeStartRef.current = null;
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
+
+  const handleTimelineClick = (e: React.MouseEvent) => {
+    // If we're clicking on a card, handleScheduleClick already stopped propagation.
+    // Also ignore if we are currently resizing
+    if (resizingId) return;
+
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const clickY = e.clientY - rect.top;
+
+    // 1hr = 70px => 1min = 70/60 px => 1px = 60/70 min
+    let minutesTotal = Math.max(0, clickY * (60 / 70));
+    // Snap to 15 mins
+    minutesTotal = Math.round(minutesTotal / 15) * 15;
+
+    const hours = Math.floor(minutesTotal / 60);
+    const mins = Math.floor(minutesTotal % 60);
+
+    const startTimeStr = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+
+    // Default 30 min duration
+    const endMinutesTotal = minutesTotal + 30;
+    const endHours = Math.floor(endMinutesTotal / 60);
+    const endMins = Math.floor(endMinutesTotal % 60);
+    const endTimeStr = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+
+    window.dispatchEvent(new CustomEvent('create-schedule', {
+      detail: { start: startTimeStr, end: endTimeStr }
+    }));
+  };
+
+  const updateSchedule = async (schedule: any, newStart: Date, newEnd: Date) => {
+    try {
+      const response = await fetch(`/api/schedules?id=${schedule.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...schedule,
+          start_time: newStart.toISOString(),
+          end_time: newEnd.toISOString()
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to update schedule');
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      alert('일정 업데이트 중 오류가 발생했습니다.');
+    }
+  };
+
   let daySchedules = schedules;
   if (isFilterOn) {
     daySchedules = daySchedules.filter(s => s.is_appointment || s.is_meeting);
@@ -75,7 +213,12 @@ export default function DayView({ currentDate }: DayViewProps) {
             ))}
           </div>
 
-          <div className="timeline-column">
+          <div
+            className="timeline-column"
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onClick={handleTimelineClick}
+          >
             {Array.from({ length: 24 }).map((_, h) => (
               <div key={h} className="hour-marker" />
             ))}
@@ -91,12 +234,17 @@ export default function DayView({ currentDate }: DayViewProps) {
 
             {daySchedules.map(schedule => {
               const { top, height } = getPosition(schedule.start_time, schedule.end_time);
+              const isResizing = resizingId === schedule.id;
+              const displayHeight = isResizing ? tempHeight : height;
+
               return (
                 <div
                   key={schedule.id}
-                  className={`day-schedule-card shadow-md clickable ${getBadgeClass(schedule)}`}
-                  style={{ top: `${top}px`, height: `${height}px` }}
+                  className={`day-schedule-card shadow-md clickable ${getBadgeClass(schedule)} ${isResizing ? 'resizing' : ''}`}
+                  style={{ top: `${top}px`, height: `${displayHeight}px` }}
                   onClick={(e) => handleScheduleClick(schedule, e)}
+                  draggable={!isResizing}
+                  onDragStart={(e) => handleDragStart(e, schedule)}
                 >
                   <div className="card-top">
                     <span className="card-title">{schedule.title}</span>
@@ -104,11 +252,17 @@ export default function DayView({ currentDate }: DayViewProps) {
                       {format(new Date(schedule.start_time), 'HH:mm')}
                     </span>
                   </div>
-                  {height > 50 && (
+                  {displayHeight > 50 && (
                     <div className="card-body">
                       <p className="card-desc">{schedule.description || '상세 일정 정보가 없습니다.'}</p>
                     </div>
                   )}
+
+                  {/* Resize Handle */}
+                  <div
+                    className="resize-handle"
+                    onMouseDown={(e) => handleResizeStart(e, schedule)}
+                  />
                 </div>
               );
             })}
@@ -254,6 +408,38 @@ export default function DayView({ currentDate }: DayViewProps) {
                 .day-schedule-card.appointment { background: #EF4444; }
                 .day-schedule-card.important { background: #10B981; }
                 .day-schedule-card.default { background: #94A3B8; }
+
+                .day-schedule-card.resizing {
+                    z-index: 100 !important;
+                    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+                    opacity: 0.9;
+                }
+
+                .resize-handle {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 10px;
+                    cursor: ns-resize;
+                    z-index: 10;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .resize-handle::after {
+                    content: '';
+                    width: 30px;
+                    height: 4px;
+                    background: rgba(255, 255, 255, 0.3);
+                    border-radius: 2px;
+                    transition: background 0.2s;
+                }
+
+                .resize-handle:hover::after {
+                    background: rgba(255, 255, 255, 0.6);
+                }
             `}</style>
     </div>
   );

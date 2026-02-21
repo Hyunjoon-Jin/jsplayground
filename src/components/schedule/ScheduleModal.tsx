@@ -12,9 +12,20 @@ interface ScheduleModalProps {
   onDelete?: (id: string) => Promise<void>;
   initialDate?: Date;
   initialData?: any;
+  initialStartTime?: string;
+  initialEndTime?: string;
 }
 
-export default function ScheduleModal({ isOpen, onClose, onSave, onDelete, initialDate, initialData }: ScheduleModalProps) {
+export default function ScheduleModal({
+  isOpen,
+  onClose,
+  onSave,
+  onDelete,
+  initialDate,
+  initialData,
+  initialStartTime,
+  initialEndTime
+}: ScheduleModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<any>('미팅');
@@ -53,13 +64,33 @@ export default function ScheduleModal({ isOpen, onClose, onSave, onDelete, initi
       setIsAppointment(false);
       setIsMeeting(false);
       setDate(format(initialDate || new Date(), 'yyyy-MM-dd'));
-      setStartTime('09:00');
-      setEndTime('10:00');
+      setStartTime(initialStartTime || '09:00');
+      setEndTime(initialEndTime || '10:00');
       setIsRecurring(false);
     }
-  }, [initialData, isOpen, initialDate]);
+  }, [initialData, isOpen, initialDate, initialStartTime, initialEndTime]);
 
   const timeSlots = getTimeSlots();
+
+  const timeToMinutes = (timeStr: string) => {
+    const [h, m] = timeStr.split(':').map(Number);
+    return h * 60 + m;
+  };
+
+  const handleStartTimeChange = (newStart: string) => {
+    setStartTime(newStart);
+
+    const startMins = timeToMinutes(newStart);
+    const endMins = timeToMinutes(endTime);
+
+    if (endMins <= startMins) {
+      // Automatically set end time to start + 30 mins
+      const nextEndMins = Math.min(23 * 60 + 45, startMins + 30);
+      const h = Math.floor(nextEndMins / 60);
+      const m = nextEndMins % 60;
+      setEndTime(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -197,12 +228,15 @@ export default function ScheduleModal({ isOpen, onClose, onSave, onDelete, initi
             <div className="time-row">
               <Clock size={18} />
               <div className="time-selects">
-                <select value={startTime} onChange={(e) => setStartTime(e.target.value)}>
+                <select value={startTime} onChange={(e) => handleStartTimeChange(e.target.value)}>
                   {timeSlots.map(t => <option key={`start-${t}`} value={t}>{t}</option>)}
                 </select>
                 <span>~</span>
                 <select value={endTime} onChange={(e) => setEndTime(e.target.value)}>
-                  {timeSlots.map(t => <option key={`end-${t}`} value={t}>{t}</option>)}
+                  {timeSlots
+                    .filter(t => timeToMinutes(t) > timeToMinutes(startTime))
+                    .map(t => <option key={`end-${t}`} value={t}>{t}</option>)
+                  }
                 </select>
               </div>
             </div>

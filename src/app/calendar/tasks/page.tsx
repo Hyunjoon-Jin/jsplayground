@@ -9,9 +9,11 @@ import {
     Calendar as CalendarIcon,
     Tag,
     AlertCircle,
-    Clock
+    Clock,
+    ChevronRight,
+    CalendarCheck
 } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, isYesterday, isToday, isTomorrow, isSameDay } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
 export default function TasksPage() {
@@ -21,6 +23,7 @@ export default function TasksPage() {
     const [filterType, setFilterType] = useState('all');
     const [filterImportance, setFilterImportance] = useState('all');
     const [sortBy, setSortBy] = useState('date-desc'); // date-desc, date-asc, importance-high
+    const [selectedDateRange, setSelectedDateRange] = useState<'all' | 'yesterday' | 'today' | 'tomorrow'>('all');
 
     useEffect(() => {
         const fetchAllSchedules = async () => {
@@ -37,8 +40,25 @@ export default function TasksPage() {
         fetchAllSchedules();
     }, []);
 
+    const dateTiers = useMemo(() => {
+        const now = new Date();
+        return {
+            yesterday: schedules.filter(s => isYesterday(parseISO(s.start_time))),
+            today: schedules.filter(s => isToday(parseISO(s.start_time))),
+            tomorrow: schedules.filter(s => isTomorrow(parseISO(s.start_time))),
+        };
+    }, [schedules]);
+
     const filteredAndSortedSchedules = useMemo(() => {
+        const now = new Date();
         let result = schedules.filter(item => {
+            const date = parseISO(item.start_time);
+
+            // Date Range Filter
+            if (selectedDateRange === 'yesterday' && !isYesterday(date)) return false;
+            if (selectedDateRange === 'today' && !isToday(date)) return false;
+            if (selectedDateRange === 'tomorrow' && !isTomorrow(date)) return false;
+
             const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()));
             const matchesType = filterType === 'all' || item.type === filterType;
@@ -59,7 +79,7 @@ export default function TasksPage() {
         });
 
         return result;
-    }, [schedules, searchQuery, filterType, filterImportance, sortBy]);
+    }, [schedules, searchQuery, filterType, filterImportance, sortBy, selectedDateRange]);
 
     const handleScheduleClick = (schedule: any) => {
         window.dispatchEvent(new CustomEvent('edit-schedule', { detail: schedule }));
@@ -75,10 +95,59 @@ export default function TasksPage() {
         return <div className="loading">데이터를 불러오는 중...</div>;
     }
 
+    const SummaryCard = ({ title, count, items, type }: { title: string, count: number, items: any[], type: string }) => {
+        const isActive = selectedDateRange === type;
+        return (
+            <div
+                className={`summary-card shadow-sm ${isActive ? 'active' : ''}`}
+                onClick={() => setSelectedDateRange(isActive ? 'all' : type as any)}
+            >
+                <div className="card-header">
+                    <span className="card-title">{title}</span>
+                    <span className="card-count">{count}</span>
+                </div>
+                <div className="card-preview">
+                    {items.length > 0 ? (
+                        items.slice(0, 2).map((s, i) => (
+                            <div key={i} className="preview-item">
+                                <div className="dot" />
+                                <span className="preview-text">{s.title}</span>
+                            </div>
+                        ))
+                    ) : (
+                        <span className="empty-text">일정 없음</span>
+                    )}
+                </div>
+                {isActive && <div className="active-indicator" />}
+            </div>
+        );
+    };
+
     return (
         <div className="tasks-container">
             <header className="tasks-header">
                 <h1 className="page-title">모든 일정 내역</h1>
+
+                <div className="summary-section">
+                    <SummaryCard
+                        title="어제"
+                        count={dateTiers.yesterday.length}
+                        items={dateTiers.yesterday}
+                        type="yesterday"
+                    />
+                    <SummaryCard
+                        title="오늘"
+                        count={dateTiers.today.length}
+                        items={dateTiers.today}
+                        type="today"
+                    />
+                    <SummaryCard
+                        title="내일"
+                        count={dateTiers.tomorrow.length}
+                        items={dateTiers.tomorrow}
+                        type="tomorrow"
+                    />
+                </div>
 
                 <div className="search-bar-container shadow-sm">
                     <SearchIcon size={18} className="search-icon" />
@@ -139,6 +208,18 @@ export default function TasksPage() {
                         </div>
                     </div>
                 </div>
+
+                {selectedDateRange !== 'all' && (
+                    <div className="active-filter-bar shadow-sm">
+                        <div className="filter-info">
+                            <CalendarCheck size={16} />
+                            <span>
+                                {selectedDateRange === 'yesterday' ? '어제' : selectedDateRange === 'today' ? '오늘' : '내일'}의 일정 목록
+                            </span>
+                        </div>
+                        <button className="clear-filter" onClick={() => setSelectedDateRange('all')}>필터 해제</button>
+                    </div>
+                )}
             </header>
 
             <main className="tasks-list">
@@ -194,7 +275,135 @@ export default function TasksPage() {
                     font-size: 24px;
                     font-weight: 800;
                     color: var(--text-primary);
+                    margin-bottom: 24px;
+                }
+
+                .summary-section {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 12px;
+                    margin-bottom: 24px;
+                }
+
+                .summary-card {
+                    background: white;
+                    padding: 16px;
+                    border-radius: 18px;
+                    border: 1px solid #F1F5F9;
+                    position: relative;
+                    transition: all 0.2s;
+                    cursor: pointer;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    min-height: 100px;
+                }
+
+                .summary-card:hover {
+                    transform: translateY(-2px);
+                    border-color: #3B82F620;
+                }
+
+                .summary-card.active {
+                    background: #3B82F605;
+                    border-color: #3B82F650;
+                    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+                }
+
+                .card-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                .card-title {
+                    font-size: 13px;
+                    font-weight: 700;
+                    color: #64748B;
+                }
+
+                .card-count {
+                    font-size: 15px;
+                    font-weight: 800;
+                    color: #3B82F6;
+                }
+
+                .card-preview {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                }
+
+                .preview-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+
+                .dot {
+                    width: 4px;
+                    height: 4px;
+                    background: #CBD5E1;
+                    border-radius: 50%;
+                }
+
+                .preview-text {
+                    font-size: 11px;
+                    color: #475569;
+                    font-weight: 500;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .empty-text {
+                    font-size: 11px;
+                    color: #94A3B8;
+                    font-style: italic;
+                }
+
+                .active-indicator {
+                    position: absolute;
+                    bottom: 0;
+                    left: 20%;
+                    right: 20%;
+                    height: 3px;
+                    background: #3B82F6;
+                    border-radius: 10px 10px 0 0;
+                }
+
+                .active-filter-bar {
+                    background: #3B82F6;
+                    color: white;
+                    padding: 12px 16px;
+                    border-radius: 12px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
                     margin-bottom: 20px;
+                    margin-top: 16px;
+                    animation: slideDown 0.3s ease;
+                }
+
+                @keyframes slideDown {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+
+                .filter-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 13px;
+                    font-weight: 700;
+                }
+
+                .clear-filter {
+                    font-size: 12px;
+                    font-weight: 700;
+                    background: rgba(255, 255, 255, 0.2);
+                    padding: 4px 10px;
+                    border-radius: 8px;
                 }
 
                 .search-bar-container {
@@ -263,6 +472,7 @@ export default function TasksPage() {
                     display: flex;
                     flex-direction: column;
                     gap: 16px;
+                    margin-top: 10px;
                 }
 
                 .task-item {
