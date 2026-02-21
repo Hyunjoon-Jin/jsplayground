@@ -56,9 +56,9 @@ export default function ScheduleModal({ isOpen, onClose, onSave, initialDate }: 
         await onSave(scheduleData);
       }
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('저장 중 오류가 발생했습니다.');
+      alert(err.message || '저장 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }

@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS public.schedules (
     user_id UUID NOT NULL REFERENCES public.user_profiles(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     description TEXT,
-    type TEXT DEFAULT '기타' CHECK (type IN ('업무', '개인', '학습', '기타')),
+    type TEXT DEFAULT '기타' CHECK (type IN ('미팅', '회의', '업무보고', '운동', '식사', '명상', '약속', '병원', '쇼핑', '자기개발', '강의', '독서', '기타')),
     importance TEXT DEFAULT 'medium' CHECK (importance IN ('high', 'medium', 'low')),
     is_appointment BOOLEAN DEFAULT false,
     is_meeting BOOLEAN DEFAULT false,
