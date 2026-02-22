@@ -17,7 +17,11 @@ function NavContent({ children }: { children: React.ReactNode }) {
     const dateParam = searchParams.get('date');
     const filterParam = searchParams.get('filter') === 'appointment';
     const currentDate = dateParam ? parseISO(dateParam) : new Date();
-    const view = pathname.split('/').pop() || 'month';
+
+    // Robust view detection
+    const view = pathname.includes('/week') ? 'week'
+        : pathname.includes('/day') ? 'day'
+            : 'month';
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -189,11 +193,10 @@ function NavContent({ children }: { children: React.ReactNode }) {
                                 style={{ transform: `translateX(${viewIndex * 100}%)` }}
                             />
                             {viewOptions.map((v) => {
-                                const targetDate = (v === 'week' || v === 'day') ? new Date() : currentDate;
                                 return (
                                     <Link
                                         key={v}
-                                        href={`/calendar/${v}?date=${format(targetDate, 'yyyy-MM-dd')}`}
+                                        href={`/calendar/${v}?date=${format(currentDate, 'yyyy-MM-dd')}`}
                                         className={`segment-btn ${view === v ? 'active' : ''}`}
                                     >
                                         {viewLabels[v].replace(' 보기', '')}
@@ -348,32 +351,36 @@ function NavContent({ children }: { children: React.ReactNode }) {
                     max-width: 280px;
                 }
 
-                .segment-highlighter {
-                    position: absolute;
-                    top: 4px;
-                    left: 4px;
-                    width: calc((100% - 8px) / 3);
-                    height: calc(100% - 8px);
-                    background: white;
-                    border-radius: 12px;
-                    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-                    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-                    z-index: 1;
-                }
+                 .segment-highlighter {
+                     position: absolute;
+                     top: 4px;
+                     left: 4px;
+                     width: calc((100% - 8px) / 3);
+                     height: calc(100% - 8px);
+                     background: white;
+                     border-radius: 12px;
+                     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+                     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                     z-index: 1;
+                     pointer-events: none;
+                 }
 
-                .segment-btn {
-                    flex: 1;
-                    padding: 8px 0;
-                    font-size: 15px;
-                    font-weight: 500;
-                    color: #94A3B8;
-                    text-align: center;
-                    border-radius: 12px;
-                    transition: all 0.3s;
-                    text-decoration: none !important;
-                    position: relative;
-                    z-index: 2;
-                }
+                 .segment-btn {
+                     flex: 1;
+                     display: flex;
+                     align-items: center;
+                     justify-content: center;
+                     height: 32px;
+                     font-size: 14px;
+                     font-weight: 600;
+                     color: #94A3B8;
+                     text-align: center;
+                     border-radius: 12px;
+                     transition: all 0.3s;
+                     text-decoration: none !important;
+                     position: relative;
+                     z-index: 2;
+                 }
 
                 .segment-btn.active {
                     color: #1A1A1A;
