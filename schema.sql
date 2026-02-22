@@ -65,6 +65,20 @@ CREATE TABLE IF NOT EXISTS public.schedules (
     updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Ensure columns exist if table was already created
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'schedules' AND column_name = 'todo_id') THEN
+        ALTER TABLE public.schedules ADD COLUMN todo_id UUID REFERENCES public.todos(id) ON DELETE SET NULL;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'schedules' AND column_name = 'is_all_day') THEN
+        ALTER TABLE public.schedules ADD COLUMN is_all_day BOOLEAN DEFAULT false;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'schedules' AND column_name = 'is_time_not_set') THEN
+        ALTER TABLE public.schedules ADD COLUMN is_time_not_set BOOLEAN DEFAULT false;
+    END IF;
+END $$;
+
 -- 6. Enable Row Level Security (RLS)
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.recurring_rules ENABLE ROW LEVEL SECURITY;
@@ -72,6 +86,14 @@ ALTER TABLE public.todos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.schedules ENABLE ROW LEVEL SECURITY;
 
 -- 7. Create RLS Policies
+
+-- Drop existing policies if they exists
+DROP POLICY IF EXISTS "Users can view own profile" ON public.user_profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.user_profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.user_profiles;
+DROP POLICY IF EXISTS "Users can manage own recurring rules" ON public.recurring_rules;
+DROP POLICY IF EXISTS "Users can manage own todos" ON public.todos;
+DROP POLICY IF EXISTS "Users can manage own schedules" ON public.schedules;
 
 -- User Profiles: Users can only see and update their own profile
 CREATE POLICY "Users can view own profile" ON public.user_profiles
@@ -137,11 +159,13 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+DROP TRIGGER IF EXISTS update_schedules_updated_at ON public.schedules;
 CREATE TRIGGER update_schedules_updated_at
     BEFORE UPDATE ON public.schedules
     FOR EACH ROW
     EXECUTE PROCEDURE update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_todos_updated_at ON public.todos;
 CREATE TRIGGER update_todos_updated_at
     BEFORE UPDATE ON public.todos
     FOR EACH ROW
