@@ -27,6 +27,11 @@ export default function DayView({ currentDate }: DayViewProps) {
   const timeSlots = getTimeSlots();
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Dragging/Moving state
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [tempTop, setTempTop] = useState<number>(0);
+  const dragStartRef = useRef<{ y: number; top: number; schedule: any } | null>(null);
+
   // Resizing state
   const [resizingId, setResizingId] = useState<string | null>(null);
   const [tempHeight, setTempHeight] = useState<number>(0);
@@ -72,42 +77,53 @@ export default function DayView({ currentDate }: DayViewProps) {
     window.dispatchEvent(new CustomEvent('edit-schedule', { detail: schedule }));
   };
 
-  // --- Drag to Move ---
-  const handleDragStart = (e: React.DragEvent, schedule: any) => {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const offsetY = e.clientY - rect.top;
+  // --- Real-time Move (Custom Mouse Move) ---
+  const handleMoveStart = (e: React.MouseEvent, schedule: any) => {
+    e.stopPropagation();
+    const { top } = getPosition(schedule.start_time, schedule.end_time);
 
-    e.dataTransfer.setData('scheduleId', schedule.id);
-    e.dataTransfer.setData('dragOffsetY', offsetY.toString());
-    e.dataTransfer.effectAllowed = 'move';
-  };
+    setDraggingId(schedule.id);
+    setTempTop(top);
+    dragStartRef.current = { y: e.clientY, top, schedule };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
+    // Disable selection globally
+    document.body.style.userSelect = 'none';
 
-  const handleDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    const scheduleId = e.dataTransfer.getData('scheduleId');
-    const dragOffsetY = parseFloat(e.dataTransfer.getData('dragOffsetY'));
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      if (!dragStartRef.current) return;
+      const deltaY = moveEvent.clientY - dragStartRef.current.y;
 
-    const schedule = schedules.find(s => s.id === scheduleId);
-    if (!schedule) return;
+      // Real-time top position (no snap for visual smoothness, or maybe light snap)
+      let nextTop = dragStartRef.current.top + deltaY;
+      setTempTop(nextTop);
+    };
 
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const dropY = e.clientY - rect.top - dragOffsetY;
+    const onMouseUp = async () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+      document.body.style.userSelect = '';
 
-    // 1hr = 70px => 1min = 70/60 px => 1px = 60/70 min
-    let minutesTotal = Math.max(0, dropY * (60 / 70));
-    // Snap to 15 mins
-    minutesTotal = Math.round(minutesTotal / 15) * 15;
+      if (dragStartRef.current) {
+        const { schedule } = dragStartRef.current;
+        const finalTop = Math.max(0, tempTop);
+        // pixel to minutes (1px = 60/70 min)
+        let minutesTotal = finalTop * (60 / 70);
+        // Snap to 15 mins
+        minutesTotal = Math.round(minutesTotal / 15) * 15;
 
-    const originalDuration = differenceInMinutes(parseISO(schedule.end_time), parseISO(schedule.start_time));
-    const newStart = addMinutes(startOfDay(currentDate), minutesTotal);
-    const newEnd = addMinutes(newStart, originalDuration);
+        const originalDuration = differenceInMinutes(parseISO(schedule.end_time), parseISO(schedule.start_time));
+        const newStart = addMinutes(startOfDay(currentDate), minutesTotal);
+        const newEnd = addMinutes(newStart, originalDuration);
 
-    updateSchedule(schedule, newStart, newEnd);
+        await updateSchedule(schedule, newStart, newEnd);
+      }
+
+      setDraggingId(null);
+      dragStartRef.current = null;
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
   };
 
   // --- Drag to Resize ---
@@ -118,6 +134,9 @@ export default function DayView({ currentDate }: DayViewProps) {
     setResizingId(schedule.id);
     setTempHeight(height);
     resizeStartRef.current = { y: e.clientY, height, schedule };
+
+    // Disable selection globally during resize
+    document.body.style.userSelect = 'none';
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       if (!resizeStartRef.current) return;
@@ -133,6 +152,7 @@ export default function DayView({ currentDate }: DayViewProps) {
     const onMouseUp = async () => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
+      document.body.style.userSelect = '';
 
       if (resizeStartRef.current) {
         const { schedule } = resizeStartRef.current;
@@ -153,8 +173,8 @@ export default function DayView({ currentDate }: DayViewProps) {
 
   const handleTimelineClick = (e: React.MouseEvent) => {
     // If we're clicking on a card, handleScheduleClick already stopped propagation.
-    // Also ignore if we are currently resizing
-    if (resizingId) return;
+    // Also ignore if we are currently resizing or dragging
+    if (resizingId || draggingId) return;
 
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const clickY = e.clientY - rect.top;
@@ -224,8 +244,6 @@ export default function DayView({ currentDate }: DayViewProps) {
 
           <div
             className="timeline-column"
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
             onClick={handleTimelineClick}
           >
             {Array.from({ length: 24 }).map((_, h) => (
@@ -244,16 +262,18 @@ export default function DayView({ currentDate }: DayViewProps) {
             {daySchedules.map(schedule => {
               const { top, height } = getPosition(schedule.start_time, schedule.end_time);
               const isResizing = resizingId === schedule.id;
+              const isDragging = draggingId === schedule.id;
+
+              const displayTop = isDragging ? tempTop : top;
               const displayHeight = isResizing ? tempHeight : height;
 
               return (
                 <div
                   key={schedule.id}
-                  className={`day-schedule-card shadow-md clickable ${getBadgeClass(schedule)} ${isResizing ? 'resizing' : ''}`}
-                  style={{ top: `${top}px`, height: `${displayHeight}px` }}
+                  className={`day-schedule-card shadow-md clickable ${getBadgeClass(schedule)} ${isResizing ? 'resizing' : ''} ${isDragging ? 'dragging' : ''}`}
+                  style={{ top: `${displayTop}px`, height: `${displayHeight}px` }}
                   onClick={(e) => handleScheduleClick(schedule, e)}
-                  draggable={!isResizing}
-                  onDragStart={(e) => handleDragStart(e, schedule)}
+                  onMouseDown={(e) => handleMoveStart(e, schedule)}
                 >
                   <div className="card-top">
                     <span className="card-title">{schedule.title}</span>
@@ -378,6 +398,7 @@ export default function DayView({ currentDate }: DayViewProps) {
                     overflow: hidden;
                     transition: transform 0.2s;
                     cursor: pointer;
+                    user-select: none; /* Prevent text selection during drag/resize */
                 }
 
                 .day-schedule-card:active {

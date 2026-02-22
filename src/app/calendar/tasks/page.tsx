@@ -11,7 +11,10 @@ import {
     AlertCircle,
     Clock,
     ChevronRight,
-    CalendarCheck
+    CalendarCheck,
+    History,
+    Target,
+    Zap
 } from 'lucide-react';
 import { format, parseISO, isYesterday, isToday, isTomorrow, isSameDay } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -97,36 +100,53 @@ export default function TasksPage() {
 
     const SummaryCard = ({ title, count, items, type, icon: Icon, color }: { title: string, count: number, items: any[], type: string, icon: any, color: string }) => {
         const isActive = selectedDateRange === type;
+        const percentage = Math.min(100, (count / 5) * 100);
+
         return (
             <div
-                className={`summary-card-modern ${type} ${isActive ? 'active' : ''}`}
+                className={`summary-card-infographic ${type} ${isActive ? 'active' : ''}`}
                 onClick={() => setSelectedDateRange(isActive ? 'all' : type as any)}
             >
-                <div className="card-top">
-                    <div className="icon-badge" style={{ backgroundColor: `${color}15`, color }}>
-                        <Icon size={18} />
-                    </div>
-                    <span className="card-label">{title}</span>
+                {/* Background Decoration Icon */}
+                <div className="card-bg-icon" style={{ color }}>
+                    <Icon size={100} strokeWidth={1} />
                 </div>
 
-                <div className="card-main">
-                    <span className="count-value" style={{ color }}>{count}</span>
-                    <span className="count-unit">개</span>
-                </div>
-
-                <div className="card-footer">
-                    {items.length > 0 ? (
-                        <div className="mini-list">
-                            {items.slice(0, 1).map((s, i) => (
-                                <span key={i} className="list-item-text">{s.title}</span>
-                            ))}
-                            {items.length > 1 && <span className="more-text">외 {items.length - 1}개...</span>}
+                <div className="card-content-top">
+                    <div className="header-row">
+                        <span className="info-label">{title}</span>
+                        <div className="mini-icon-badge" style={{ backgroundColor: `${color}15`, color }}>
+                            <Icon size={14} />
                         </div>
-                    ) : (
-                        <span className="no-schedules">일정 없음</span>
-                    )}
+                    </div>
+                    <div className="data-row">
+                        <span className="main-stat" style={{ color: isActive ? color : '#1e293b' }}>{count}</span>
+                        <span className="stat-unit">개</span>
+                    </div>
                 </div>
-                {isActive && <div className="active-glow" style={{ backgroundColor: color }} />}
+
+                <div className="card-content-bottom">
+                    <div className="visual-graph-container">
+                        <div className="graph-bar-bg">
+                            <div className="graph-bar-fill" style={{ width: `${percentage}%`, backgroundColor: color }} />
+                        </div>
+                        <div className="graph-labels">
+                            <span className="graph-hint">밀도</span>
+                            <span className="graph-value">{percentage.toFixed(0)}%</span>
+                        </div>
+                    </div>
+
+                    <div className="card-preview-mini">
+                        {items.length > 0 ? (
+                            <span className="preview-simple-text">
+                                {items[0].title}{items.length > 1 ? ` 외 ${items.length - 1}개` : ''}
+                            </span>
+                        ) : (
+                            <span className="preview-empty-text">일정 없음</span>
+                        )}
+                    </div>
+                </div>
+                {isActive && <div className="active-border-glow" style={{ backgroundColor: color }} />}
             </div>
         );
     };
@@ -142,7 +162,7 @@ export default function TasksPage() {
                         count={dateTiers.yesterday.length}
                         items={dateTiers.yesterday}
                         type="yesterday"
-                        icon={require('lucide-react').History}
+                        icon={History}
                         color="#64748B"
                     />
                     <SummaryCard
@@ -150,7 +170,7 @@ export default function TasksPage() {
                         count={dateTiers.today.length}
                         items={dateTiers.today}
                         type="today"
-                        icon={require('lucide-react').Target}
+                        icon={Target}
                         color="#3B82F6"
                     />
                     <SummaryCard
@@ -158,7 +178,7 @@ export default function TasksPage() {
                         count={dateTiers.tomorrow.length}
                         items={dateTiers.tomorrow}
                         type="tomorrow"
-                        icon={require('lucide-react').Zap}
+                        icon={Zap}
                         color="#10B981"
                     />
                 </div>

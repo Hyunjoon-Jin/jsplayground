@@ -158,6 +158,8 @@ function NavContent({ children }: { children: React.ReactNode }) {
     };
 
     const isFullPage = pathname === '/calendar/profile' || pathname === '/calendar/tasks';
+    const viewOptions = ['month', 'week', 'day'] as const;
+    const viewIndex = viewOptions.indexOf(view as any);
 
     return (
         <div className="calendar-root">
@@ -182,8 +184,11 @@ function NavContent({ children }: { children: React.ReactNode }) {
 
                     <div className="header-bottom-centered">
                         <div className="view-toggle-segment">
-                            {(['month', 'week', 'day'] as const).map((v) => {
-                                // For week and day, always go to Today. For month, keep current context.
+                            <div
+                                className="segment-highlighter"
+                                style={{ transform: `translateX(${viewIndex * 100}%)` }}
+                            />
+                            {viewOptions.map((v) => {
                                 const targetDate = (v === 'week' || v === 'day') ? new Date() : currentDate;
                                 return (
                                     <Link
@@ -333,31 +338,46 @@ function NavContent({ children }: { children: React.ReactNode }) {
                 }
 
                 .view-toggle-segment {
+                    position: relative;
                     display: flex;
-                    background: var(--bg-surface);
+                    background: #F8FAFC;
                     padding: 4px;
-                    border-radius: 14px;
-                    border: 1px solid var(--border-subtle);
+                    border-radius: 16px;
+                    border: 1px solid #F1F5F9;
                     width: 100%;
                     max-width: 280px;
+                }
+
+                .segment-highlighter {
+                    position: absolute;
+                    top: 4px;
+                    left: 4px;
+                    width: calc((100% - 8px) / 3);
+                    height: calc(100% - 8px);
+                    background: white;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+                    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                    z-index: 1;
                 }
 
                 .segment-btn {
                     flex: 1;
                     padding: 8px 0;
-                    font-size: 14px;
-                    font-weight: 700;
-                    color: var(--text-muted);
+                    font-size: 15px;
+                    font-weight: 500;
+                    color: #94A3B8;
                     text-align: center;
-                    border-radius: 10px;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    border-radius: 12px;
+                    transition: all 0.3s;
                     text-decoration: none !important;
+                    position: relative;
+                    z-index: 2;
                 }
 
                 .segment-btn.active {
-                    background: white;
-                    color: var(--accent-primary);
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                    color: #1A1A1A;
+                    font-weight: 700;
                 }
 
                 .filter-toggle {

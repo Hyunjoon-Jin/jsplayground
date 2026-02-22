@@ -2,96 +2,168 @@
 
 import { useState } from 'react';
 import {
-    format,
-    addMonths,
-    subMonths,
-    startOfMonth,
-    endOfMonth,
-    startOfWeek,
-    endOfWeek,
-    eachDayOfInterval,
-    isSameMonth,
-    isSameDay
+  format,
+  addMonths,
+  subMonths,
+  addYears,
+  subYears,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  isSameMonth,
+  isSameDay,
+  setMonth,
+  setYear,
+  getYear
 } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 interface DatePickerModalProps {
-    isOpen: boolean;
-    currentDate: Date;
-    onClose: () => void;
-    onSelect: (date: Date) => void;
+  isOpen: boolean;
+  currentDate: Date;
+  onClose: () => void;
+  onSelect: (date: Date) => void;
 }
 
+type PickerMode = 'day' | 'month' | 'year';
+
 export default function DatePickerModal({ isOpen, currentDate: initialDate, onClose, onSelect }: DatePickerModalProps) {
-    const [viewDate, setViewDate] = useState(initialDate);
+  const [viewDate, setViewDate] = useState(initialDate);
+  const [mode, setMode] = useState<PickerMode>('day');
 
-    if (!isOpen) return null;
+  if (!isOpen) return null;
 
-    const startMonthMonth = startOfMonth(viewDate);
-    const endMonthMonth = endOfMonth(startMonthMonth);
-    const startDay = startOfWeek(startMonthMonth);
-    const endDay = endOfWeek(endMonthMonth);
+  // Day View Logic
+  const startMonthMonth = startOfMonth(viewDate);
+  const endMonthMonth = endOfMonth(startMonthMonth);
+  const startDay = startOfWeek(startMonthMonth);
+  const endDay = endOfWeek(endMonthMonth);
+  const days = eachDayOfInterval({ start: startDay, end: endDay });
 
-    const days = eachDayOfInterval({
-        start: startDay,
-        end: endDay,
-    });
+  // Year View Logic
+  const currentYear = getYear(viewDate);
+  const startYearRange = Math.floor(currentYear / 12) * 12;
+  const yearRange = Array.from({ length: 12 }, (_, i) => startYearRange + i);
 
-    const handlePrevMonth = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        setViewDate(subMonths(viewDate, 1));
-    };
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (mode === 'day') setViewDate(subMonths(viewDate, 1));
+    else if (mode === 'month') setViewDate(subYears(viewDate, 1));
+    else setViewDate(subYears(viewDate, 12));
+  };
 
-    const handleNextMonth = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        setViewDate(addMonths(viewDate, 1));
-    };
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (mode === 'day') setViewDate(addMonths(viewDate, 1));
+    else if (mode === 'month') setViewDate(addYears(viewDate, 1));
+    else setViewDate(addYears(viewDate, 12));
+  };
 
-    return (
-        <div className="picker-overlay" onClick={onClose}>
-            <div className="picker-content" onClick={(e) => e.stopPropagation()}>
-                <div className="picker-header">
-                    <button onClick={handlePrevMonth} className="p-nav-btn">
-                        <ChevronLeft size={16} />
-                    </button>
-                    <h2 className="p-title">
-                        {format(viewDate, 'MMMM yyyy')}
-                    </h2>
-                    <button onClick={handleNextMonth} className="p-nav-btn">
-                        <ChevronRight size={16} />
-                    </button>
-                </div>
+  const handleHeaderClick = () => {
+    if (mode === 'day') setMode('month');
+    else if (mode === 'month') setMode('year');
+    else setMode('day');
+  };
 
-                <div className="p-grid-header">
-                    {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d) => (
-                        <div key={d} className="p-weekday">{d}</div>
-                    ))}
-                </div>
+  const handleMonthSelect = (m: number) => {
+    setViewDate(setMonth(viewDate, m));
+    setMode('day');
+  };
 
-                <div className="p-grid">
-                    {days.map((day, idx) => {
-                        const isSelected = isSameDay(day, initialDate);
-                        const isToday = isSameDay(day, new Date());
-                        const isCurrentMonth = isSameMonth(day, viewDate);
+  const handleYearSelect = (y: number) => {
+    setViewDate(setYear(viewDate, y));
+    setMode('month');
+  };
 
-                        return (
-                            <button
-                                key={idx}
-                                className={`p-day-btn ${!isCurrentMonth ? 'p-other' : ''} ${isSelected ? 'p-selected' : ''} ${isToday && !isSelected ? 'p-today' : ''}`}
-                                onClick={() => {
-                                    onSelect(day);
-                                    onClose();
-                                }}
-                            >
-                                {format(day, 'd')}
-                            </button>
-                        );
-                    })}
-                </div>
+  return (
+    <div className="picker-overlay" onClick={onClose}>
+      <div className="picker-content" onClick={(e) => e.stopPropagation()}>
+        <div className="picker-header">
+          <button onClick={handlePrev} className="p-nav-btn">
+            <ChevronLeft size={16} />
+          </button>
+          <button className="p-title-btn" onClick={handleHeaderClick}>
+            <h2 className="p-title">
+              {mode === 'day' && format(viewDate, 'MMMM yyyy')}
+              {mode === 'month' && format(viewDate, 'yyyy')}
+              {mode === 'year' && `${yearRange[0]} - ${yearRange[11]}`}
+            </h2>
+          </button>
+          <button onClick={handleNext} className="p-nav-btn">
+            <ChevronRight size={16} />
+          </button>
+        </div>
+
+        {mode === 'day' && (
+          <>
+            <div className="p-grid-header">
+              {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d) => (
+                <div key={d} className="p-weekday">{d}</div>
+              ))}
             </div>
+            <div className="p-grid">
+              {days.map((day, idx) => {
+                const isSelected = isSameDay(day, initialDate);
+                const isToday = isSameDay(day, new Date());
+                const isCurrentMonth = isSameMonth(day, viewDate);
+                return (
+                  <button
+                    key={idx}
+                    className={`p-day-btn ${!isCurrentMonth ? 'p-other' : ''} ${isSelected ? 'p-selected' : ''} ${isToday && !isSelected ? 'p-today' : ''}`}
+                    onClick={() => {
+                      onSelect(day);
+                      onClose();
+                    }}
+                  >
+                    {format(day, 'd')}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
 
-            <style jsx>{`
+        {mode === 'month' && (
+          <div className="p-grid-month">
+            {Array.from({ length: 12 }, (_, i) => {
+              const date = setMonth(viewDate, i);
+              const isSelected = isSameMonth(date, initialDate);
+              return (
+                <button
+                  key={i}
+                  className={`p-month-btn ${isSelected ? 'p-selected' : ''}`}
+                  onClick={() => handleMonthSelect(i)}
+                >
+                  {format(date, 'MMM')}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {mode === 'year' && (
+          <div className="p-grid-month">
+            {yearRange.map((y) => {
+              const isSelected = getYear(initialDate) === y;
+              const isCurrentYear = getYear(viewDate) === y;
+              return (
+                <button
+                  key={y}
+                  className={`p-month-btn ${isSelected ? 'p-selected' : ''} ${isCurrentYear && !isSelected ? 'p-focus' : ''}`}
+                  onClick={() => handleYearSelect(y)}
+                >
+                  {y}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <style jsx>{`
         .picker-overlay {
           position: fixed;
           top: 0;
@@ -115,6 +187,7 @@ export default function DatePickerModal({ isOpen, currentDate: initialDate, onCl
         .picker-content {
           background: white;
           width: 340px;
+          min-height: 400px;
           border-radius: 16px;
           padding: 24px;
           box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
@@ -134,11 +207,25 @@ export default function DatePickerModal({ isOpen, currentDate: initialDate, onCl
           margin-bottom: 28px;
         }
 
+        .p-title-btn {
+            background: transparent;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .p-title-btn:hover {
+            background: #F8FAFC;
+        }
+
         .p-title {
           font-size: 19px;
           font-weight: 500;
           color: #1A1A1A;
           letter-spacing: -0.01em;
+          margin: 0;
         }
 
         .p-nav-btn {
@@ -179,13 +266,17 @@ export default function DatePickerModal({ isOpen, currentDate: initialDate, onCl
           gap: 6px;
         }
 
-        .p-day-btn {
-          height: 44px;
+        .p-grid-month {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 8px 0;
+        }
+
+        .p-day-btn, .p-month-btn {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 18px;
-          font-weight: 500;
           border-radius: 10px;
           transition: all 0.1s;
           background: transparent;
@@ -194,7 +285,19 @@ export default function DatePickerModal({ isOpen, currentDate: initialDate, onCl
           cursor: pointer;
         }
 
-        .p-day-btn:hover:not(.p-selected) {
+        .p-day-btn {
+          height: 44px;
+          font-size: 18px;
+          font-weight: 500;
+        }
+
+        .p-month-btn {
+            height: 60px;
+            font-size: 17px;
+            font-weight: 500;
+        }
+
+        .p-day-btn:hover:not(.p-selected), .p-month-btn:hover:not(.p-selected) {
           background: #F8FAFC;
         }
 
@@ -204,7 +307,7 @@ export default function DatePickerModal({ isOpen, currentDate: initialDate, onCl
           opacity: 0.5;
         }
 
-        .p-day-btn.p-selected {
+        .p-day-btn.p-selected, .p-month-btn.p-selected {
           background: #1C1C1E !important;
           color: white !important;
           font-weight: 600;
@@ -214,7 +317,12 @@ export default function DatePickerModal({ isOpen, currentDate: initialDate, onCl
           color: #1C1C1E;
           font-weight: 800;
         }
+
+        .p-month-btn.p-focus {
+            background: #F1F5F9;
+            font-weight: 600;
+        }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }

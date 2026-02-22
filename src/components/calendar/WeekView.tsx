@@ -14,7 +14,7 @@ import {
 import { ko } from 'date-fns/locale';
 import { getTimeSlots } from '@/utils/dateUtils';
 import { useSchedules } from '@/hooks/useSchedules';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 
 interface WeekViewProps {
@@ -31,6 +31,12 @@ export default function WeekView({ currentDate }: WeekViewProps) {
     const end = endOfWeek(currentDate);
     return eachDayOfInterval({ start, end });
   }, [currentDate]);
+
+  // Dragging/Moving state
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [tempTop, setTempTop] = useState<number>(0);
+  const [hoverDay, setHoverDay] = useState<Date | null>(null);
+  const dragStartRef = useRef<{ x: number; y: number; top: number; schedule: any } | null>(null);
 
   // Real-time current time for indicator
   const [now, setNow] = useState(new Date());
@@ -79,58 +85,78 @@ export default function WeekView({ currentDate }: WeekViewProps) {
     router.push(`/calendar/day?${params.toString()}`);
   };
 
-  const handleDragStart = (e: React.DragEvent, schedule: any) => {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const offsetY = e.clientY - rect.top;
+  // --- Real-time Move (Custom Mouse Move) ---
+  const handleMoveStart = (e: React.MouseEvent, schedule: any) => {
+    e.stopPropagation();
+    const { top } = getPosition(schedule.start_time, schedule.end_time);
 
-    e.dataTransfer.setData('scheduleId', schedule.id);
-    e.dataTransfer.setData('dragOffsetY', offsetY.toString());
-    e.dataTransfer.effectAllowed = 'move';
-  };
+    setDraggingId(schedule.id);
+    setTempTop(top);
+    setHoverDay(parseISO(schedule.start_time));
+    dragStartRef.current = { x: e.clientX, y: e.clientY, top, schedule };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
+    document.body.style.userSelect = 'none';
 
-  const handleDrop = async (e: React.DragEvent, dropDay: Date) => {
-    e.preventDefault();
-    const scheduleId = e.dataTransfer.getData('scheduleId');
-    const dragOffsetY = parseFloat(e.dataTransfer.getData('dragOffsetY'));
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      if (!dragStartRef.current) return;
+      const deltaY = moveEvent.clientY - dragStartRef.current.y;
+      setTempTop(dragStartRef.current.top + deltaY);
 
-    const schedule = schedules.find(s => s.id === scheduleId);
-    if (!schedule) return;
-
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const dropY = e.clientY - rect.top - dragOffsetY;
-
-    // 70px per hour => 1min = 70/60 px => 1px = 60/70 min
-    let minutesTotal = Math.max(0, dropY * (60 / 70));
-    // Snap to 15 mins
-    minutesTotal = Math.round(minutesTotal / 15) * 15;
-
-    const originalDuration = differenceInMinutes(parseISO(schedule.end_time), parseISO(schedule.start_time));
-
-    const newStart = addMinutes(startOfDay(dropDay), minutesTotal);
-    const newEnd = addMinutes(newStart, originalDuration);
-
-    try {
-      const response = await fetch(`/api/schedules?id=${schedule.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...schedule,
-          start_time: newStart.toISOString(),
-          end_time: newEnd.toISOString()
-        })
+      // Determine which day column we are over
+      const dayElements = document.querySelectorAll('.day-column');
+      let foundDay: Date | null = null;
+      dayElements.forEach((el, idx) => {
+        const rect = el.getBoundingClientRect();
+        if (moveEvent.clientX >= rect.left && moveEvent.clientX <= rect.right) {
+          foundDay = weekDays[idx];
+        }
       });
+      if (foundDay) setHoverDay(foundDay);
+    };
 
-      if (!response.ok) throw new Error('Failed to update schedule');
-      router.refresh();
-    } catch (error) {
-      console.error(error);
-      alert('일정 이동 중 오류가 발생했습니다.');
-    }
+    const onMouseUp = async () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+      document.body.style.userSelect = '';
+
+      if (dragStartRef.current && hoverDay) {
+        const { schedule } = dragStartRef.current;
+        const finalTop = Math.max(0, tempTop);
+        // pixel to minutes (1px = 60/70 min)
+        let minutesTotal = finalTop * (60 / 70);
+        // Snap to 15 mins
+        minutesTotal = Math.round(minutesTotal / 15) * 15;
+
+        const originalDuration = differenceInMinutes(parseISO(schedule.end_time), parseISO(schedule.start_time));
+        const newStart = addMinutes(startOfDay(hoverDay), minutesTotal);
+        const newEnd = addMinutes(newStart, originalDuration);
+
+        try {
+          const response = await fetch(`/api/schedules?id=${schedule.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...schedule,
+              start_time: newStart.toISOString(),
+              end_time: newEnd.toISOString()
+            })
+          });
+
+          if (!response.ok) throw new Error('Failed to update schedule');
+          router.refresh();
+        } catch (error) {
+          console.error(error);
+          alert('일정 이동 중 오류가 발생했습니다.');
+        }
+      }
+
+      setDraggingId(null);
+      setHoverDay(null);
+      dragStartRef.current = null;
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
   };
 
   return (
@@ -174,8 +200,6 @@ export default function WeekView({ currentDate }: WeekViewProps) {
               <div
                 key={day.toISOString()}
                 className="day-column"
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, day)}
               >
                 {Array.from({ length: 24 }).map((_, h) => (
                   <div key={h} className="hour-marker" />
@@ -192,14 +216,22 @@ export default function WeekView({ currentDate }: WeekViewProps) {
 
                 {daySchedules.map(schedule => {
                   const { top, height } = getPosition(schedule.start_time, schedule.end_time);
+                  const isDragging = draggingId === schedule.id;
+
+                  // If dragging and this is the start day OR if dragging and this is the hover day
+                  // We show the block either at its original place (if not hover) or at temp place
+
+                  // Simple logic: if this is THE dragging schedule, hide it from its original day
+                  // and show it ONLY on the hoverDay
+                  if (draggingId === schedule.id) return null;
+
                   return (
                     <div
                       key={schedule.id}
                       className={`week-schedule-block shadow-sm clickable ${getBadgeClass(schedule)}`}
                       style={{ top: `${top}px`, height: `${height}px` }}
                       onClick={(e) => handleScheduleClick(schedule, e)}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, schedule)}
+                      onMouseDown={(e) => handleMoveStart(e, schedule)}
                     >
                       <div className="block-title">{schedule.title}</div>
                       <div className="block-time">
@@ -208,6 +240,21 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                     </div>
                   );
                 })}
+
+                {/* Show dragging preview on hover day */}
+                {draggingId && hoverDay && isSameDay(day, hoverDay) && (
+                  <div
+                    className={`week-schedule-block shadow-lg dragging ${getBadgeClass(schedules.find(s => s.id === draggingId))}`}
+                    style={{
+                      top: `${tempTop}px`,
+                      height: `${getPosition(schedules.find(s => s.id === draggingId)!.start_time, schedules.find(s => s.id === draggingId)!.end_time).height}px`,
+                      opacity: 0.8,
+                      zIndex: 100
+                    }}
+                  >
+                    <div className="block-title">{schedules.find(s => s.id === draggingId)?.title}</div>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -352,6 +399,7 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                     gap: 2px;
                     cursor: pointer;
                     transition: transform 0.1s;
+                    user-select: none; /* Prevent flickering during drag */
                 }
 
                 .week-schedule-block:active {
