@@ -6,6 +6,7 @@ import {
   isSameDay,
   eachDayOfInterval,
   endOfWeek,
+  endOfDay,
   parseISO,
   addMinutes,
   differenceInMinutes,
@@ -24,7 +25,6 @@ interface WeekViewProps {
 export default function WeekView({ currentDate }: WeekViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const isFilterOn = searchParams.get('filter') === 'appointment';
 
   const weekDays = useMemo(() => {
     const start = startOfWeek(currentDate);
@@ -51,19 +51,21 @@ export default function WeekView({ currentDate }: WeekViewProps) {
   const { schedules, loading } = useSchedules(currentDate, 'week');
   const timeSlots = getTimeSlots();
 
-  const getPosition = (startTime: string, endTime: string) => {
-    const start = new Date(startTime);
-    const end = new Date(endTime);
-    const startMinutes = start.getHours() * 60 + start.getMinutes();
-    const endMinutes = end.getHours() * 60 + end.getMinutes();
+  const getPosition = (startTime: string, endTime: string, referenceDate: Date) => {
+    const start = parseISO(startTime);
+    const end = parseISO(endTime);
+    const dayStart = startOfDay(referenceDate);
+    const dayEnd = endOfDay(referenceDate);
 
-    // height in pixels (1min = 1.16px to match the hour marker size of 70px)
-    const minHeight = 24;
-    const calculatedHeight = (endMinutes - startMinutes) * (70 / 60);
+    const effectiveStart = start < dayStart ? dayStart : start;
+    const effectiveEnd = end > dayEnd ? dayEnd : end;
+
+    const startMinutes = effectiveStart.getHours() * 60 + effectiveStart.getMinutes();
+    const endMinutes = effectiveEnd.getHours() * 60 + effectiveEnd.getMinutes();
 
     return {
       top: startMinutes * (70 / 60),
-      height: Math.max(minHeight, calculatedHeight)
+      height: Math.max(30, (endMinutes - startMinutes) * (70 / 60))
     };
   };
 
@@ -88,7 +90,7 @@ export default function WeekView({ currentDate }: WeekViewProps) {
   // --- Real-time Move (Custom Mouse Move) ---
   const handleMoveStart = (e: React.MouseEvent, schedule: any) => {
     e.stopPropagation();
-    const { top } = getPosition(schedule.start_time, schedule.end_time);
+    const { top } = getPosition(schedule.start_time, schedule.end_time, parseISO(schedule.start_time));
 
     setDraggingId(schedule.id);
     setTempTop(top);
@@ -191,10 +193,13 @@ export default function WeekView({ currentDate }: WeekViewProps) {
           </div>
 
           {weekDays.map(day => {
-            let daySchedules = schedules.filter(s => isSameDay(new Date(s.start_time), day));
-            if (isFilterOn) {
-              daySchedules = daySchedules.filter(s => s.is_appointment || s.is_meeting);
-            }
+            const dayStart = startOfDay(day);
+            const dayEnd = endOfDay(day);
+            let daySchedules = schedules.filter(s => {
+              const sStart = new Date(s.start_time);
+              const sEnd = new Date(s.end_time);
+              return (sStart <= dayEnd && sEnd >= dayStart);
+            });
 
             return (
               <div
@@ -215,11 +220,9 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                 )}
 
                 {daySchedules.map(schedule => {
-                  const { top, height } = getPosition(schedule.start_time, schedule.end_time);
+                  const { top, height } = getPosition(schedule.start_time, schedule.end_time, day);
                   const isDragging = draggingId === schedule.id;
-
-                  // If dragging and this is the start day OR if dragging and this is the hover day
-                  // We show the block either at its original place (if not hover) or at temp place
+                  const displayTop = isDragging ? tempTop : top;
 
                   // Simple logic: if this is THE dragging schedule, hide it from its original day
                   // and show it ONLY on the hoverDay
@@ -228,14 +231,26 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                   return (
                     <div
                       key={schedule.id}
-                      className={`week-schedule-block shadow-sm clickable ${getBadgeClass(schedule)}`}
-                      style={{ top: `${top}px`, height: `${height}px` }}
+                      className={`week-schedule-card shadow-sm clickable ${getBadgeClass(schedule)} ${isDragging ? 'dragging' : ''} ${schedule.is_all_day ? 'all-day' : ''}`}
+                      style={{
+                        top: `${displayTop}px`,
+                        height: `${height}px`
+                      }}
                       onClick={(e) => handleScheduleClick(schedule, e)}
                       onMouseDown={(e) => handleMoveStart(e, schedule)}
                     >
-                      <div className="block-title">{schedule.title}</div>
-                      <div className="block-time">
-                        {format(new Date(schedule.start_time), 'HH:mm')} - {format(new Date(schedule.end_time), 'HH:mm')}
+                      <div className="card-inner">
+                        <div className="card-header">
+                          {schedule.is_all_day && <span className="all-day-tag">종일</span>}
+                          {schedule.is_time_not_set && <span className="no-time-tag">시간미지정</span>}
+                          <span className="card-type">[{schedule.type}]</span>
+                        </div>
+                        <div className="card-title">{schedule.title}</div>
+                        {!schedule.is_all_day && !schedule.is_time_not_set && height > 40 && (
+                          <div className="card-time">
+                            {format(parseISO(schedule.start_time), 'HH:mm')}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -247,7 +262,7 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                     className={`week-schedule-block shadow-lg dragging ${getBadgeClass(schedules.find(s => s.id === draggingId))}`}
                     style={{
                       top: `${tempTop}px`,
-                      height: `${getPosition(schedules.find(s => s.id === draggingId)!.start_time, schedules.find(s => s.id === draggingId)!.end_time).height}px`,
+                      height: `${getPosition(schedules.find(s => s.id === draggingId)!.start_time, schedules.find(s => s.id === draggingId)!.end_time, day).height}px`,
                       opacity: 0.8,
                       zIndex: 100
                     }}

@@ -90,3 +90,121 @@ select:focus {
   transform: scale(0.96);
   transition: transform 0.1s ease;
 }
+
+/* Schedule Card Premium Styles */
+.day-schedule-card,
+.week-schedule-card {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-family: var(--font-base);
+  border-left: 4px solid transparent;
+  overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+}
+
+.day-schedule-card:hover,
+.week-schedule-card:hover {
+  z-index: 20;
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.day-schedule-card.meeting,
+.week-schedule-card.meeting {
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border-left-color: #3B82F6;
+  color: #1E40AF;
+}
+
+.day-schedule-card.appointment,
+.week-schedule-card.appointment {
+  background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+  border-left-color: #10B981;
+  color: #065F46;
+}
+
+.day-schedule-card.important,
+.week-schedule-card.important {
+  background: linear-gradient(135deg, #FFF1F2 0%, #FFE4E6 100%);
+  border-left-color: #F43F5E;
+  color: #9F1239;
+}
+
+.day-schedule-card.default,
+.week-schedule-card.default {
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+  border-left-color: #94A3B8;
+  color: #334155;
+}
+
+.day-schedule-card.all-day,
+.week-schedule-card.all-day {
+  border-left-width: 0;
+  opacity: 0.9;
+}
+
+.card-header-mini,
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.all-day-tag,
+.no-time-tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 800;
+}
+
+.all-day-tag {
+  background: #1E293B;
+  color: white;
+}
+
+.no-time-tag {
+  background: #CBD5E1;
+  color: #1E293B;
+}
+
+.card-type {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.card-title-main,
+.card-title {
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-time-range,
+.card-time {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.resizing {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.dragging {
+  opacity: 0.6;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  z-index: 100;
+  pointer-events: none;
+}

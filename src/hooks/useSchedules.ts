@@ -22,21 +22,30 @@ export interface Schedule {
     color?: string;
     is_recurring: boolean;
     recurring_id?: string;
+    todo_id?: string;
+    is_all_day: boolean;
+    is_time_not_set: boolean;
 }
 
 export const useSchedules = (currentDate: Date, view: 'month' | 'week' | 'day') => {
     const [schedules, setSchedules] = useState<Schedule[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
 
     const fetchSchedules = useCallback(async () => {
         setLoading(true);
         setError(null);
 
+        // Get filter params
+        const fType = searchParams.get('f_type');
+        const fImportance = searchParams.get('f_importance');
+        const fAppt = searchParams.get('f_appt') === 'true';
+        const fMeet = searchParams.get('f_meet') === 'true';
+
         let start: Date;
         let end: Date;
 
-        // 뷰 타입에 따라 조회 범위 설정 (Padded for safety)
         if (view === 'month') {
             start = startOfWeek(startOfMonth(currentDate));
             end = endOfWeek(endOfMonth(currentDate));
@@ -56,9 +65,18 @@ export const useSchedules = (currentDate: Date, view: 'month' | 'week' | 'day') 
                 .lte('start_time', end.toISOString())
                 .order('start_time', { ascending: true });
 
-            // 월간 뷰에서는 약속/회의만 필터링 (요구사항)
-            if (view === 'month') {
-                query = query.or('is_appointment.eq.true,is_meeting.eq.true');
+            // Apply Filters
+            if (fType && fType !== 'all') {
+                query = query.eq('type', fType);
+            }
+            if (fImportance && fImportance !== 'all') {
+                query = query.eq('importance', fImportance);
+            }
+            if (fAppt) {
+                query = query.eq('is_appointment', true);
+            }
+            if (fMeet) {
+                query = query.eq('is_meeting', true);
             }
 
             const { data, error: supabaseError } = await query;
@@ -71,7 +89,7 @@ export const useSchedules = (currentDate: Date, view: 'month' | 'week' | 'day') 
         } finally {
             setLoading(false);
         }
-    }, [currentDate, view]);
+    }, [currentDate, view, searchParams.toString()]);
 
     useEffect(() => {
         fetchSchedules();

@@ -4,6 +4,8 @@ import {
   format,
   isSameMonth,
   isSameDay,
+  startOfDay,
+  endOfDay,
 } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { getMonthGrid } from '@/utils/dateUtils';
@@ -19,7 +21,6 @@ export default function MonthView({ currentDate }: MonthViewProps) {
   const router = useRouter();
   const days = getMonthGrid(currentDate);
   const searchParams = useSearchParams();
-  const isFilterOn = searchParams.get('filter') === 'appointment';
 
   const { schedules, loading } = useSchedules(currentDate, 'month');
 
@@ -50,7 +51,14 @@ export default function MonthView({ currentDate }: MonthViewProps) {
   };
 
   const renderSchedules = (day: Date) => {
-    let daySchedules = schedules.filter(s => isSameDay(new Date(s.start_time), day));
+    const dayStart = startOfDay(day);
+    const dayEnd = endOfDay(day);
+
+    let daySchedules = schedules.filter(s => {
+      const sStart = new Date(s.start_time);
+      const sEnd = new Date(s.end_time);
+      return (sStart <= dayEnd && sEnd >= dayStart);
+    });
 
     // Sort: Meetings/Appointments first, then others
     daySchedules.sort((a, b) => {
@@ -60,22 +68,32 @@ export default function MonthView({ currentDate }: MonthViewProps) {
       return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
     });
 
-    if (isFilterOn) {
-      daySchedules = daySchedules.filter(s => s.is_appointment || s.is_meeting);
-    }
 
     return (
       <div className="day-schedules">
-        {daySchedules.slice(0, 3).map(schedule => (
-          <div
-            key={schedule.id}
-            className={`schedule-chip ${getBadgeClass(schedule)}`}
-            title={schedule.title}
-            onClick={(e) => handleScheduleClick(schedule, e)}
-          >
-            <span className="chip-title">{schedule.title}</span>
-          </div>
-        ))}
+        {daySchedules.slice(0, 3).map(schedule => {
+          const isAppt = schedule.is_appointment;
+          const isMeet = schedule.is_meeting;
+          const statusText = isMeet ? '회의' : isAppt ? '약속' : '';
+
+          return (
+            <div
+              key={schedule.id}
+              className={`schedule-chip-premium ${getBadgeClass(schedule)}`}
+              onClick={(e) => handleScheduleClick(schedule, e)}
+            >
+              <div className="chip-main-row">
+                <div className="chip-tags">
+                  {schedule.is_all_day && <span className="chip-tag all-day">종일</span>}
+                  {schedule.is_time_not_set && <span className="chip-tag no-time">미지정</span>}
+                </div>
+                <span className="type-prefix">[{schedule.type}]</span>
+                <span className="chip-title-text">{schedule.title}</span>
+                {statusText && <span className="status-tag">{statusText}</span>}
+              </div>
+            </div>
+          );
+        })}
         {daySchedules.length > 3 && (
           <div className="more-count">+{daySchedules.length - 3}</div>
         )}
@@ -190,36 +208,77 @@ export default function MonthView({ currentDate }: MonthViewProps) {
                     margin-top: 4px;
                 }
 
-                .schedule-chip {
+                 .schedule-chip-premium {
+                    display: flex;
+                    flex-direction: column;
+                    padding: 3px 6px;
+                    border-radius: 6px;
+                    font-size: 10px;
+                    font-weight: 600;
+                    margin-bottom: 2px;
+                    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+                    color: white;
+                    border: 1px solid transparent;
+                }
+
+                .schedule-chip-premium:hover {
+                    opacity: 0.95;
+                    transform: scale(1.02);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                }
+
+                .chip-main-row {
                     display: flex;
                     align-items: center;
-                    padding: 2px 6px;
-                    border-radius: 6px;
-                    font-size: 11px;
-                    font-weight: 600;
+                    gap: 4px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                }
+
+                .chip-tags {
+                    display: flex;
+                    gap: 2px;
+                }
+
+                .chip-tag {
+                    font-size: 8px;
+                    padding: 0 3px;
+                    border-radius: 3px;
+                    font-weight: 800;
+                    flex-shrink: 0;
+                }
+
+                .chip-tag.all-day { background: #1E293B; color: white; }
+                .chip-tag.no-time { background: #CBD5E1; color: #1E293B; }
+
+                .type-prefix {
+                    opacity: 0.85;
+                    font-weight: 800;
+                    font-size: 9px;
+                    flex-shrink: 0;
+                }
+
+                .chip-title-text {
+                    flex: 1;
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
-                    transition: all 0.2s;
-                    color: white;
                 }
 
-                .schedule-chip:hover {
-                    opacity: 0.9;
-                    transform: translateX(1px);
-                }
-
-                .chip-title {
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
+                .status-tag {
+                    font-size: 8px;
+                    background: rgba(255, 255, 255, 0.2);
+                    padding: 1px 4px;
+                    border-radius: 4px;
+                    flex-shrink: 0;
+                    font-weight: 800;
                 }
 
                 /* Blocks Colors */
-                .schedule-chip.meeting { background: #1C1C1E; }
-                .schedule-chip.appointment { background: #EF4444; }
-                .schedule-chip.important { background: #10B981; }
-                .schedule-chip.default { background: #94A3B8; }
+                .schedule-chip-premium.meeting { background: #1C1C1E; }
+                .schedule-chip-premium.appointment { background: #EF4444; }
+                .schedule-chip-premium.important { background: #10B981; }
+                .schedule-chip-premium.default { background: #94A3B8; }
 
                 .more-count {
                     font-size: 10px;

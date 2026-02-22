@@ -6,7 +6,8 @@ import {
   parseISO,
   addMinutes,
   differenceInMinutes,
-  startOfDay
+  startOfDay,
+  endOfDay
 } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { getTimeSlots } from '@/utils/dateUtils';
@@ -21,7 +22,6 @@ interface DayViewProps {
 export default function DayView({ currentDate }: DayViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const isFilterOn = searchParams.get('filter') === 'appointment';
 
   const { schedules, loading } = useSchedules(currentDate, 'day');
   const timeSlots = getTimeSlots();
@@ -54,11 +54,18 @@ export default function DayView({ currentDate }: DayViewProps) {
     }
   }, [currentDate]);
 
-  const getPosition = (startTime: string, endTime: string) => {
-    const start = new Date(startTime);
-    const end = new Date(endTime);
-    const startMinutes = start.getHours() * 60 + start.getMinutes();
-    const endMinutes = end.getHours() * 60 + end.getMinutes();
+  const getPosition = (startTime: string, endTime: string, referenceDate: Date) => {
+    const start = parseISO(startTime);
+    const end = parseISO(endTime);
+    const dayStart = startOfDay(referenceDate);
+    const dayEnd = endOfDay(referenceDate);
+
+    const effectiveStart = start < dayStart ? dayStart : start;
+    const effectiveEnd = end > dayEnd ? dayEnd : end;
+
+    const startMinutes = effectiveStart.getHours() * 60 + effectiveStart.getMinutes();
+    const endMinutes = effectiveEnd.getHours() * 60 + effectiveEnd.getMinutes();
+
     return {
       top: startMinutes * (70 / 60),
       height: Math.max(30, (endMinutes - startMinutes) * (70 / 60))
@@ -80,7 +87,7 @@ export default function DayView({ currentDate }: DayViewProps) {
   // --- Real-time Move (Custom Mouse Move) ---
   const handleMoveStart = (e: React.MouseEvent, schedule: any) => {
     e.stopPropagation();
-    const { top } = getPosition(schedule.start_time, schedule.end_time);
+    const { top } = getPosition(schedule.start_time, schedule.end_time, currentDate);
 
     setDraggingId(schedule.id);
     setTempTop(top);
@@ -129,7 +136,7 @@ export default function DayView({ currentDate }: DayViewProps) {
   // --- Drag to Resize ---
   const handleResizeStart = (e: React.MouseEvent, schedule: any) => {
     e.stopPropagation();
-    const { height } = getPosition(schedule.start_time, schedule.end_time);
+    const { height } = getPosition(schedule.start_time, schedule.end_time, currentDate);
 
     setResizingId(schedule.id);
     setTempHeight(height);
@@ -220,11 +227,6 @@ export default function DayView({ currentDate }: DayViewProps) {
     }
   };
 
-  let daySchedules = schedules;
-  if (isFilterOn) {
-    daySchedules = daySchedules.filter(s => s.is_appointment || s.is_meeting);
-  }
-
   return (
     <div className="day-view-container">
       <div className="day-view-header">
@@ -259,8 +261,14 @@ export default function DayView({ currentDate }: DayViewProps) {
               </div>
             )}
 
-            {daySchedules.map(schedule => {
-              const { top, height } = getPosition(schedule.start_time, schedule.end_time);
+            {schedules.filter(s => {
+              const dayStart = startOfDay(currentDate);
+              const dayEnd = endOfDay(currentDate);
+              const sStart = new Date(s.start_time);
+              const sEnd = new Date(s.end_time);
+              return (sStart <= dayEnd && sEnd >= dayStart);
+            }).map(schedule => {
+              const { top, height } = getPosition(schedule.start_time, schedule.end_time, currentDate);
               const isResizing = resizingId === schedule.id;
               const isDragging = draggingId === schedule.id;
 
@@ -270,16 +278,23 @@ export default function DayView({ currentDate }: DayViewProps) {
               return (
                 <div
                   key={schedule.id}
-                  className={`day-schedule-card shadow-md clickable ${getBadgeClass(schedule)} ${isResizing ? 'resizing' : ''} ${isDragging ? 'dragging' : ''}`}
+                  className={`day-schedule-card shadow-md clickable ${getBadgeClass(schedule)} ${isResizing ? 'resizing' : ''} ${isDragging ? 'dragging' : ''} ${schedule.is_all_day ? 'all-day' : ''}`}
                   style={{ top: `${displayTop}px`, height: `${displayHeight}px` }}
                   onClick={(e) => handleScheduleClick(schedule, e)}
                   onMouseDown={(e) => handleMoveStart(e, schedule)}
                 >
-                  <div className="card-top">
-                    <span className="card-title">{schedule.title}</span>
-                    <span className="card-time">
-                      {format(new Date(schedule.start_time), 'HH:mm')}
-                    </span>
+                  <div className="card-content-premium">
+                    <div className="card-header-mini">
+                      {schedule.is_all_day && <span className="all-day-tag">종일</span>}
+                      {schedule.is_time_not_set && <span className="no-time-tag">시간미지정</span>}
+                      <span className="card-type">[{schedule.type}]</span>
+                    </div>
+                    <div className="card-title-main">{schedule.title}</div>
+                    {!schedule.is_all_day && !schedule.is_time_not_set && (
+                      <div className="card-time-range">
+                        {format(parseISO(schedule.start_time), 'HH:mm')} - {format(parseISO(schedule.end_time), 'HH:mm')}
+                      </div>
+                    )}
                   </div>
                   {displayHeight > 50 && (
                     <div className="card-body">

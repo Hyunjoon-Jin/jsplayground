@@ -27,10 +27,27 @@ CREATE TABLE IF NOT EXISTS public.recurring_rules (
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 4. Create schedules table
+-- 4. Create todos table
+CREATE TABLE IF NOT EXISTS public.todos (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT,
+    type TEXT DEFAULT '기타' CHECK (type IN ('미팅', '회의', '업무보고', '운동', '식사', '명상', '약속', '병원', '쇼핑', '자기개발', '강의', '독서', '기타')),
+    importance TEXT DEFAULT 'medium' CHECK (importance IN ('high', 'medium', 'low')),
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'in_progress', 'completed')),
+    progress INTEGER DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
+    target_date DATE,
+    deadline DATE,
+    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 5. Create schedules table
 CREATE TABLE IF NOT EXISTS public.schedules (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+    todo_id UUID REFERENCES public.todos(id) ON DELETE SET NULL,
     title TEXT NOT NULL,
     description TEXT,
     type TEXT DEFAULT '기타' CHECK (type IN ('미팅', '회의', '업무보고', '운동', '식사', '명상', '약속', '병원', '쇼핑', '자기개발', '강의', '독서', '기타')),
@@ -42,16 +59,19 @@ CREATE TABLE IF NOT EXISTS public.schedules (
     color TEXT,
     is_recurring BOOLEAN DEFAULT false,
     recurring_id UUID REFERENCES public.recurring_rules(id) ON DELETE CASCADE,
+    is_all_day BOOLEAN DEFAULT false,
+    is_time_not_set BOOLEAN DEFAULT false,
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 5. Enable Row Level Security (RLS)
+-- 6. Enable Row Level Security (RLS)
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.recurring_rules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.todos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.schedules ENABLE ROW LEVEL SECURITY;
 
--- 6. Create RLS Policies
+-- 7. Create RLS Policies
 
 -- User Profiles: Users can only see and update their own profile
 CREATE POLICY "Users can view own profile" ON public.user_profiles
@@ -67,11 +87,15 @@ CREATE POLICY "Users can insert own profile" ON public.user_profiles
 CREATE POLICY "Users can manage own recurring rules" ON public.recurring_rules
     FOR ALL USING (auth.uid() = user_id);
 
+-- Todos: Users can only manage their own todos
+CREATE POLICY "Users can manage own todos" ON public.todos
+    FOR ALL USING (auth.uid() = user_id);
+
 -- Schedules: Users can only manage their own schedules
 CREATE POLICY "Users can manage own schedules" ON public.schedules
     FOR ALL USING (auth.uid() = user_id);
 
--- 7. Functions & Triggers
+-- 8. Functions & Triggers
 
 -- Function to handle new user profile creation
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -118,7 +142,14 @@ CREATE TRIGGER update_schedules_updated_at
     FOR EACH ROW
     EXECUTE PROCEDURE update_updated_at_column();
 
--- 8. Useful Indexes
+CREATE TRIGGER update_todos_updated_at
+    BEFORE UPDATE ON public.todos
+    FOR EACH ROW
+    EXECUTE PROCEDURE update_updated_at_column();
+
+-- 9. Useful Indexes
+CREATE INDEX IF NOT EXISTS idx_todos_user_id ON public.todos(user_id);
 CREATE INDEX IF NOT EXISTS idx_schedules_user_id ON public.schedules(user_id);
 CREATE INDEX IF NOT EXISTS idx_schedules_start_time ON public.schedules(start_time);
 CREATE INDEX IF NOT EXISTS idx_schedules_recurring_id ON public.schedules(recurring_id);
+CREATE INDEX IF NOT EXISTS idx_schedules_todo_id ON public.schedules(todo_id);

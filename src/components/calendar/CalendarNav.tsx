@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Plus, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, ChevronDown, SlidersHorizontal, Check } from 'lucide-react';
 import Link from 'next/link';
 import { format, addMonths, subMonths, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -25,13 +25,9 @@ function NavContent({ children }: { children: React.ReactNode }) {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-    const [isFilterOn, setIsFilterOn] = useState(filterParam);
+    const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
     const [editingData, setEditingData] = useState<any>(null);
     const [initialTimes, setInitialTimes] = useState<{ start: string; end: string } | null>(null);
-
-    useEffect(() => {
-        setIsFilterOn(searchParams.get('filter') === 'appointment');
-    }, [searchParams]);
 
     useEffect(() => {
         const handleEditSchedule = (e: any) => {
@@ -54,13 +50,18 @@ function NavContent({ children }: { children: React.ReactNode }) {
         };
     }, []);
 
-    const updateParams = (newDate?: Date, filter?: boolean) => {
+    const updateFilterParams = (updates: Record<string, string | null>) => {
+        const params = new URLSearchParams(searchParams.toString());
+        Object.entries(updates).forEach(([key, value]) => {
+            if (value === null || value === 'all') params.delete(key);
+            else params.set(key, value);
+        });
+        router.push(`${pathname}?${params.toString()}`);
+    };
+
+    const updateParams = (newDate?: Date) => {
         const params = new URLSearchParams(searchParams.toString());
         if (newDate) params.set('date', format(newDate, 'yyyy-MM-dd'));
-        if (filter !== undefined) {
-            if (filter) params.set('filter', 'appointment');
-            else params.delete('filter');
-        }
         router.push(`${pathname}?${params.toString()}`);
     };
 
@@ -76,11 +77,6 @@ function NavContent({ children }: { children: React.ReactNode }) {
         else updateParams(new Date(currentDate.getTime() + 24 * 60 * 60 * 1000));
     };
 
-    const toggleFilter = () => {
-        const nextFilter = !isFilterOn;
-        setIsFilterOn(nextFilter);
-        updateParams(undefined, nextFilter);
-    };
 
     const handleSave = async (data: any) => {
         if (data.id) {
@@ -206,14 +202,79 @@ function NavContent({ children }: { children: React.ReactNode }) {
                         </div>
                     </div>
 
-                    <div className="filter-toggle">
-                        <span className="filter-label">약속/회의만 보기</span>
-                        <button
-                            className={`toggle-switch ${isFilterOn ? 'on' : ''}`}
-                            onClick={toggleFilter}
-                        >
-                            <span className="toggle-thumb" />
-                        </button>
+                    <div className="header-actions">
+                        <div className="filter-system">
+                            <button
+                                className={`filter-trigger-btn ${isFilterPanelOpen ? 'active' : ''}`}
+                                onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+                            >
+                                <SlidersHorizontal size={18} />
+                                <span>필터링</span>
+                                <ChevronDown size={14} className={`arrow ${isFilterPanelOpen ? 'rotated' : ''}`} />
+                            </button>
+
+                            {isFilterPanelOpen && (
+                                <>
+                                    <div className="filter-overlay" onClick={() => setIsFilterPanelOpen(false)} />
+                                    <div className="filter-dropdown-panel shadow-premium">
+                                        <div className="filter-group">
+                                            <label>일정 유형</label>
+                                            <div className="filter-options-grid">
+                                                {['all', '미팅', '회의', '업무보고', '운동', '식사', '약속', '자기개발', '기타'].map(t => (
+                                                    <button
+                                                        key={t}
+                                                        className={`option-chip ${(searchParams.get('f_type') || 'all') === t ? 'selected' : ''}`}
+                                                        onClick={() => updateFilterParams({ f_type: t })}
+                                                    >
+                                                        {t === 'all' ? '전체' : t}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="filter-group">
+                                            <label>중요도</label>
+                                            <div className="filter-options-row">
+                                                {['all', 'high', 'medium', 'low'].map(v => (
+                                                    <button
+                                                        key={v}
+                                                        className={`option-chip ${(searchParams.get('f_importance') || 'all') === v ? 'selected' : ''}`}
+                                                        onClick={() => updateFilterParams({ f_importance: v })}
+                                                    >
+                                                        {v === 'all' ? '전체' : v === 'high' ? '높음' : v === 'medium' ? '보통' : '낮음'}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="filter-group no-border">
+                                            <label>상태 필터</label>
+                                            <div className="status-filter-row">
+                                                <button
+                                                    className={`status-btn ${searchParams.get('f_appt') === 'true' ? 'on' : ''}`}
+                                                    onClick={() => updateFilterParams({ f_appt: searchParams.get('f_appt') === 'true' ? null : 'true' })}
+                                                >
+                                                    <div className="check-box">{searchParams.get('f_appt') === 'true' && <Check size={12} />}</div>
+                                                    <span>약속만</span>
+                                                </button>
+                                                <button
+                                                    className={`status-btn ${searchParams.get('f_meet') === 'true' ? 'on' : ''}`}
+                                                    onClick={() => updateFilterParams({ f_meet: searchParams.get('f_meet') === 'true' ? null : 'true' })}
+                                                >
+                                                    <div className="check-box">{searchParams.get('f_meet') === 'true' && <Check size={12} />}</div>
+                                                    <span>회의만</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="filter-footer">
+                                            <button className="reset-btn" onClick={() => updateFilterParams({ f_type: null, f_importance: null, f_appt: null, f_meet: null })}>초기화</button>
+                                            <button className="apply-btn" onClick={() => setIsFilterPanelOpen(false)}>확인</button>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </header>
             )}
@@ -342,91 +403,241 @@ function NavContent({ children }: { children: React.ReactNode }) {
 
                 .view-toggle-segment {
                     position: relative;
-                    display: flex;
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
                     background: #F8FAFC;
                     padding: 4px;
                     border-radius: 16px;
                     border: 1px solid #F1F5F9;
                     width: 100%;
                     max-width: 280px;
+                    margin: 0 auto;
                 }
 
-                 .segment-highlighter {
-                     position: absolute;
-                     top: 4px;
-                     left: 4px;
-                     width: calc((100% - 8px) / 3);
-                     height: calc(100% - 8px);
-                     background: white;
-                     border-radius: 12px;
-                     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-                     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-                     z-index: 1;
-                     pointer-events: none;
-                 }
+                .segment-highlighter {
+                    position: absolute;
+                    top: 4px;
+                    left: 4px;
+                    width: calc((100% - 8px) / 3);
+                    height: calc(100% - 8px);
+                    background: white;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+                    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                    z-index: 1;
+                    pointer-events: none;
+                }
 
-                 .segment-btn {
-                     flex: 1;
-                     display: flex;
-                     align-items: center;
-                     justify-content: center;
-                     height: 32px;
-                     font-size: 14px;
-                     font-weight: 600;
-                     color: #94A3B8;
-                     text-align: center;
-                     border-radius: 12px;
-                     transition: all 0.3s;
-                     text-decoration: none !important;
-                     position: relative;
-                     z-index: 2;
-                 }
+                .segment-btn {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 32px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #94A3B8;
+                    text-align: center;
+                    border-radius: 12px;
+                    transition: all 0.3s;
+                    text-decoration: none !important;
+                    position: relative;
+                    z-index: 2;
+                }
 
                 .segment-btn.active {
                     color: #1A1A1A;
                     font-weight: 700;
                 }
 
-                .filter-toggle {
+                .header-actions {
+                    position: absolute;
+                    top: 24px;
+                    right: 20px;
+                    z-index: 60;
+                }
+
+                .filter-system {
+                    position: relative;
+                }
+
+                .filter-trigger-btn {
                     display: flex;
                     align-items: center;
-                    gap: 12px;
-                }
-
-                .filter-label {
+                    gap: 8px;
+                    padding: 8px 16px;
+                    background: var(--bg-surface);
+                    border: 1px solid var(--border-subtle);
+                    border-radius: 20px;
                     font-size: 14px;
-                    font-weight: 500;
+                    font-weight: 600;
                     color: var(--text-secondary);
-                }
-
-                .toggle-switch {
-                    width: 44px;
-                    height: 24px;
-                    background: #E2E8F0;
-                    border-radius: 12px;
-                    position: relative;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    transition: all 0.2s;
                     cursor: pointer;
                 }
 
-                .toggle-switch.on {
-                    background: var(--accent-primary);
+                .filter-trigger-btn:hover, .filter-trigger-btn.active {
+                    background: #F1F5F9;
+                    border-color: #CBD5E1;
+                    color: #1A1A1A;
                 }
 
-                .toggle-thumb {
+                .filter-trigger-btn .arrow {
+                    transition: transform 0.3s;
+                }
+
+                .filter-trigger-btn .arrow.rotated {
+                    transform: rotate(180deg);
+                }
+
+                .filter-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    z-index: 55;
+                }
+
+                .filter-dropdown-panel {
                     position: absolute;
-                    top: 2px;
-                    left: 2px;
+                    top: calc(100% + 12px);
+                    right: 0;
+                    width: 320px;
+                    background: white;
+                    border-radius: 24px;
+                    padding: 24px;
+                    z-index: 60;
+                    border: 1px solid #F1F5F9;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+                    animation: slideInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+
+                @keyframes slideInDown {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+
+                .filter-group {
+                    margin-bottom: 20px;
+                    padding-bottom: 20px;
+                    border-bottom: 1px solid #F1F5F9;
+                }
+
+                .filter-group.no-border {
+                    border-bottom: none;
+                    margin-bottom: 0;
+                }
+
+                .filter-group label {
+                    display: block;
+                    font-size: 13px;
+                    font-weight: 700;
+                    color: #94A3B8;
+                    margin-bottom: 12px;
+                }
+
+                .filter-options-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 8px;
+                }
+
+                .filter-options-row {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                }
+
+                .option-chip {
+                    padding: 6px 10px;
+                    border-radius: 10px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    background: #F8FAFC;
+                    color: #64748B;
+                    border: 1px solid #F1F5F9;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    text-align: center;
+                }
+
+                .option-chip:hover {
+                    background: #F1F5F9;
+                }
+
+                .option-chip.selected {
+                    background: #1C1C1E;
+                    color: white;
+                    border-color: #1C1C1E;
+                }
+
+                .status-filter-row {
+                    display: flex;
+                    gap: 16px;
+                }
+
+                .status-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: none;
+                    border: none;
+                    padding: 0;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #64748B;
+                }
+
+                .status-btn.on {
+                    color: #1C1C1E;
+                }
+
+                .check-box {
                     width: 20px;
                     height: 20px;
-                    background: white;
-                    border-radius: 50%;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                    border-radius: 6px;
+                    border: 2px solid #E2E8F0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s;
                 }
 
-                .toggle-switch.on .toggle-thumb {
-                    left: calc(100% - 22px);
+                .status-btn.on .check-box {
+                    background: #1C1C1E;
+                    border-color: #1C1C1E;
+                    color: white;
+                }
+
+                .filter-footer {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-top: 24px;
+                    padding-top: 16px;
+                    border-top: 1px solid #F1F5F9;
+                }
+
+                .reset-btn {
+                    background: none;
+                    border: none;
+                    color: #94A3B8;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                }
+
+                .apply-btn {
+                    background: #1C1C1E;
+                    color: white;
+                    border: none;
+                    padding: 8px 20px;
+                    border-radius: 12px;
+                    font-size: 14px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
                 }
 
                 .calendar-main-content {

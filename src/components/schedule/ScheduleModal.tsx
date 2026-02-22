@@ -5,6 +5,8 @@ import { X, Clock, Calendar as CalendarIcon, RotateCcw, Check } from 'lucide-rea
 import { format, parseISO } from 'date-fns';
 import { getTimeSlots, getTimeSlotDate } from '@/utils/dateUtils';
 import DatePickerModal from '@/components/calendar/DatePickerModal';
+import { useTodos } from '@/hooks/useTodos';
+import { Target } from 'lucide-react';
 
 interface ScheduleModalProps {
   isOpen: boolean;
@@ -33,14 +35,21 @@ export default function ScheduleModal({
   const [importance, setImportance] = useState<any>('medium');
   const [isAppointment, setIsAppointment] = useState(false);
   const [isMeeting, setIsMeeting] = useState(false);
-  const [date, setDate] = useState(format(initialDate || new Date(), 'yyyy-MM-dd'));
+  const [startDate, setStartDate] = useState(format(initialDate || new Date(), 'yyyy-MM-dd'));
+  const [endDate, setEndDate] = useState(format(initialDate || new Date(), 'yyyy-MM-dd'));
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('10:00');
+  const [isAllDay, setIsAllDay] = useState(false);
+  const [isTimeNotSet, setIsTimeNotSet] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurringConfig, setRecurringConfig] = useState<any>({ type: 'weekly', days: [1] });
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [todoId, setTodoId] = useState<string>('');
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [isEndDatePickerOpen, setIsEndDatePickerOpen] = useState(false);
+
+  const { todos } = useTodos();
 
   useEffect(() => {
     if (initialData && isOpen) {
@@ -53,10 +62,14 @@ export default function ScheduleModal({
 
       const start = parseISO(initialData.start_time);
       const end = parseISO(initialData.end_time);
-      setDate(format(start, 'yyyy-MM-dd'));
+      setStartDate(format(start, 'yyyy-MM-dd'));
+      setEndDate(format(end, 'yyyy-MM-dd'));
       setStartTime(format(start, 'HH:mm'));
       setEndTime(format(end, 'HH:mm'));
+      setIsAllDay(initialData.is_all_day || false);
+      setIsTimeNotSet(initialData.is_time_not_set || false);
       setIsRecurring(initialData.is_recurring || false);
+      setTodoId(initialData.todo_id || '');
     } else if (!initialData && isOpen) {
       // Clear for new
       setTitle('');
@@ -65,10 +78,15 @@ export default function ScheduleModal({
       setImportance('medium');
       setIsAppointment(false);
       setIsMeeting(false);
-      setDate(format(initialDate || new Date(), 'yyyy-MM-dd'));
+      const defaultDate = format(initialDate || new Date(), 'yyyy-MM-dd');
+      setStartDate(defaultDate);
+      setEndDate(defaultDate);
       setStartTime(initialStartTime || '09:00');
       setEndTime(initialEndTime || '10:00');
+      setIsAllDay(false);
+      setIsTimeNotSet(false);
       setIsRecurring(false);
+      setTodoId('');
     }
   }, [initialData, isOpen, initialDate, initialStartTime, initialEndTime]);
 
@@ -101,8 +119,16 @@ export default function ScheduleModal({
 
     setLoading(true);
     try {
-      const start = getTimeSlotDate(parseISO(date), startTime);
-      const end = getTimeSlotDate(parseISO(date), endTime);
+      let finalStartTime = startTime;
+      let finalEndTime = endTime;
+
+      if (isAllDay || isTimeNotSet) {
+        finalStartTime = '00:00';
+        finalEndTime = '23:59';
+      }
+
+      const start = getTimeSlotDate(parseISO(startDate), finalStartTime);
+      const end = getTimeSlotDate(parseISO(endDate), finalEndTime);
 
       const scheduleData: any = {
         title,
@@ -113,7 +139,10 @@ export default function ScheduleModal({
         is_meeting: isMeeting,
         start_time: start.toISOString(),
         end_time: end.toISOString(),
+        is_all_day: isAllDay,
+        is_time_not_set: isTimeNotSet,
         is_recurring: isRecurring,
+        todo_id: todoId || null,
       };
 
       if (initialData?.id) {
@@ -209,6 +238,25 @@ export default function ScheduleModal({
             </div>
           </div>
 
+          <div className="field-group">
+            <div className="select-container todo-link">
+              <label><Target size={14} style={{ marginRight: 4 }} /> 연동할 할 일 (선택)</label>
+              <select value={todoId} onChange={(e) => setTodoId(e.target.value)}>
+                <option value="">연동 안 함</option>
+                <optgroup label="진행 중인 할 일">
+                  {todos.filter(t => t.status !== 'completed').map(todo => (
+                    <option key={todo.id} value={todo.id}>{todo.title}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="완료된 할 일">
+                  {todos.filter(t => t.status === 'completed').map(todo => (
+                    <option key={todo.id} value={todo.id}>{todo.title}</option>
+                  ))}
+                </optgroup>
+              </select>
+            </div>
+          </div>
+
           <div className="toggle-grid">
             <label className={`toggle-card ${isAppointment ? 'active' : ''}`}>
               <input type="checkbox" checked={isAppointment} onChange={(e) => setIsAppointment(e.target.checked)} />
@@ -223,30 +271,59 @@ export default function ScheduleModal({
           </div>
 
           <div className="time-config">
-            <div className="time-row">
-              <CalendarIcon size={18} />
-              <button
-                className="custom-date-picker-btn"
-                onClick={() => setIsDatePickerOpen(true)}
-              >
-                {format(parseISO(date), 'yyyy년 MM월 dd일')}
-              </button>
-            </div>
-            <div className="time-row">
-              <Clock size={18} />
-              <div className="time-selects">
-                <select value={startTime} onChange={(e) => handleStartTimeChange(e.target.value)}>
-                  {timeSlots.map(t => <option key={`start-${t}`} value={t}>{t}</option>)}
-                </select>
-                <span>~</span>
-                <select value={endTime} onChange={(e) => setEndTime(e.target.value)}>
-                  {timeSlots
-                    .filter(t => timeToMinutes(t) > timeToMinutes(startTime))
-                    .map(t => <option key={`end-${t}`} value={t}>{t}</option>)
-                  }
-                </select>
+            <div className="time-row-stack">
+              <div className="time-label-group">
+                <CalendarIcon size={16} />
+                <span className="group-label">기간 설정</span>
+              </div>
+
+              <div className="date-range-picker">
+                <button
+                  className="custom-date-picker-btn"
+                  onClick={() => setIsDatePickerOpen(true)}
+                >
+                  {format(parseISO(startDate), 'yyyy. MM. dd')}
+                </button>
+                <span className="arrow">→</span>
+                <button
+                  className="custom-date-picker-btn"
+                  onClick={() => setIsEndDatePickerOpen(true)}
+                >
+                  {format(parseISO(endDate), 'yyyy. MM. dd')}
+                </button>
               </div>
             </div>
+
+            <div className="options-row">
+              <label className="checkbox-label">
+                <input type="checkbox" checked={isAllDay} onChange={(e) => setIsAllDay(e.target.checked)} />
+                <span className="custom-checkbox"></span>
+                <span>종일</span>
+              </label>
+              <label className="checkbox-label">
+                <input type="checkbox" checked={isTimeNotSet} onChange={(e) => setIsTimeNotSet(e.target.checked)} />
+                <span className="custom-checkbox"></span>
+                <span>시간 미지정</span>
+              </label>
+            </div>
+
+            {(!isAllDay && !isTimeNotSet) && (
+              <div className="time-row">
+                <Clock size={16} />
+                <div className="time-selects">
+                  <select value={startTime} onChange={(e) => handleStartTimeChange(e.target.value)}>
+                    {timeSlots.map(t => <option key={`start-${t}`} value={t}>{t}</option>)}
+                  </select>
+                  <span className="sep">~</span>
+                  <select value={endTime} onChange={(e) => setEndTime(e.target.value)}>
+                    {timeSlots
+                      .filter(t => startDate !== endDate || timeToMinutes(t) > timeToMinutes(startTime))
+                      .map(t => <option key={`end-${t}`} value={t}>{t}</option>)
+                    }
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
 
           {!initialData && (
@@ -283,9 +360,29 @@ export default function ScheduleModal({
 
         <DatePickerModal
           isOpen={isDatePickerOpen}
-          currentDate={parseISO(date)}
+          currentDate={parseISO(startDate)}
           onClose={() => setIsDatePickerOpen(false)}
-          onSelect={(d) => setDate(format(d, 'yyyy-MM-dd'))}
+          onSelect={(d) => {
+            const newStart = format(d, 'yyyy-MM-dd');
+            setStartDate(newStart);
+            if (parseISO(endDate) < d) {
+              setEndDate(newStart);
+            }
+          }}
+        />
+
+        <DatePickerModal
+          isOpen={isEndDatePickerOpen}
+          currentDate={parseISO(endDate)}
+          onClose={() => setIsEndDatePickerOpen(false)}
+          onSelect={(d) => {
+            const newEnd = format(d, 'yyyy-MM-dd');
+            if (d < parseISO(startDate)) {
+              alert('종료일은 시작일보다 빠를 수 없습니다.');
+              return;
+            }
+            setEndDate(newEnd);
+          }}
         />
       </div>
 
@@ -427,11 +524,92 @@ export default function ScheduleModal({
                     gap: 14px;
                 }
 
+                .time-row-stack {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                .time-label-group {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    color: var(--accent-primary);
+                }
+
+                .group-label {
+                    font-size: 13px;
+                    font-weight: 700;
+                }
+
+                .date-range-picker {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: white;
+                    padding: 8px 12px;
+                    border-radius: 12px;
+                    border: 1px solid #E2E8F0;
+                }
+
+                .date-range-picker .arrow {
+                    color: #94A3B8;
+                    font-size: 14px;
+                }
+
+                .options-row {
+                    display: flex;
+                    gap: 20px;
+                    margin-top: 4px;
+                    padding-left: 4px;
+                }
+
+                .checkbox-label {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    cursor: pointer;
+                }
+
+                .custom-checkbox {
+                    width: 18px;
+                    height: 18px;
+                    border: 2px solid #E2E8F0;
+                    border-radius: 6px;
+                    display: inline-block;
+                    position: relative;
+                    transition: all 0.2s;
+                }
+
+                .checkbox-label input { display: none; }
+                .checkbox-label input:checked + .custom-checkbox {
+                    background: var(--accent-primary);
+                    border-color: var(--accent-primary);
+                }
+
+                .checkbox-label input:checked + .custom-checkbox::after {
+                    content: '✓';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    color: white;
+                    font-size: 12px;
+                }
+
                 .time-row {
                     display: flex;
                     align-items: center;
                     gap: 12px;
                     color: var(--accent-primary);
+                    margin-top: 4px;
+                    background: white;
+                    padding: 8px 12px;
+                    border-radius: 12px;
+                    border: 1px solid #E2E8F0;
                 }
 
                 .custom-date-picker-btn {
@@ -454,15 +632,21 @@ export default function ScheduleModal({
                 .time-selects {
                     display: flex;
                     align-items: center;
-                    gap: 8px;
-                    color: var(--text-muted);
+                    gap: 12px;
+                    color: var(--text-primary);
                 }
 
                 .time-selects select {
                     background: none;
+                    border-radius: 0;
                     padding: 0;
-                    width: auto;
-                    font-weight: 600;
+                    font-weight: 700;
+                    font-size: 15px;
+                }
+
+                .time-selects .sep {
+                    color: #94A3B8;
+                    font-weight: 400;
                 }
 
                 .recurring-section {
