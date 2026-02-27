@@ -166,7 +166,7 @@ function NavContent({ children }: { children: React.ReactNode }) {
             {!isFullPage && (
                 <header className="new-header">
                     <div className="header-top-centered">
-                        <button onClick={handlePrev} className="nav-arrow-btn">
+                        <button onClick={handlePrev} className="nav-arrow-btn" aria-label="이전 날짜로 이동">
                             <ChevronLeft size={24} />
                         </button>
                         <button
@@ -177,7 +177,7 @@ function NavContent({ children }: { children: React.ReactNode }) {
                                 {getDateLabel()}
                             </h1>
                         </button>
-                        <button onClick={handleNext} className="nav-arrow-btn">
+                        <button onClick={handleNext} className="nav-arrow-btn" aria-label="다음 날짜로 이동">
                             <ChevronRight size={24} />
                         </button>
                     </div>
@@ -360,7 +360,7 @@ function NavContent({ children }: { children: React.ReactNode }) {
                 }
 
                 .display-date {
-                    font-size: 20px;
+                    font-size: var(--text-md);
                     font-weight: 800;
                     color: var(--text-primary);
                     min-width: 140px;
@@ -405,10 +405,10 @@ function NavContent({ children }: { children: React.ReactNode }) {
                     position: relative;
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
-                    background: #F8FAFC;
+                    background: var(--bg-surface);
                     padding: 4px;
                     border-radius: 16px;
-                    border: 1px solid #F1F5F9;
+                    border: 1px solid var(--border-subtle);
                     width: 100%;
                     max-width: 280px;
                     margin: 0 auto;
@@ -420,9 +420,9 @@ function NavContent({ children }: { children: React.ReactNode }) {
                     left: 4px;
                     width: calc((100% - 8px) / 3);
                     height: calc(100% - 8px);
-                    background: white;
+                    background: var(--bg-elevated);
                     border-radius: 12px;
-                    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+                    box-shadow: var(--shadow-md);
                     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
                     z-index: 1;
                     pointer-events: none;
@@ -433,9 +433,9 @@ function NavContent({ children }: { children: React.ReactNode }) {
                     align-items: center;
                     justify-content: center;
                     height: 32px;
-                    font-size: 14px;
+                    font-size: var(--text-sm);
                     font-weight: 600;
-                    color: #94A3B8;
+                    color: var(--text-muted);
                     text-align: center;
                     border-radius: 12px;
                     transition: all 0.3s;
@@ -445,7 +445,7 @@ function NavContent({ children }: { children: React.ReactNode }) {
                 }
 
                 .segment-btn.active {
-                    color: #1A1A1A;
+                    color: var(--text-primary);
                     font-weight: 700;
                 }
 
@@ -476,9 +476,9 @@ function NavContent({ children }: { children: React.ReactNode }) {
                 }
 
                 .filter-trigger-btn:hover, .filter-trigger-btn.active {
-                    background: #F1F5F9;
-                    border-color: #CBD5E1;
-                    color: #1A1A1A;
+                    background: var(--border-subtle);
+                    border-color: var(--border-default);
+                    color: var(--text-primary);
                 }
 
                 .filter-trigger-btn .arrow {
@@ -503,12 +503,12 @@ function NavContent({ children }: { children: React.ReactNode }) {
                     top: calc(100% + 12px);
                     right: 0;
                     width: 320px;
-                    background: white;
-                    border-radius: 24px;
+                    background: var(--bg-elevated);
+                    border-radius: var(--radius-xl);
                     padding: 24px;
                     z-index: 60;
-                    border: 1px solid #F1F5F9;
-                    box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+                    border: 1px solid var(--border-subtle);
+                    box-shadow: var(--shadow-lg);
                     animation: slideInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
                 }
 
@@ -520,7 +520,7 @@ function NavContent({ children }: { children: React.ReactNode }) {
                 .filter-group {
                     margin-bottom: 20px;
                     padding-bottom: 20px;
-                    border-bottom: 1px solid #F1F5F9;
+                    border-bottom: 1px solid var(--border-subtle);
                 }
 
                 .filter-group.no-border {
@@ -530,9 +530,9 @@ function NavContent({ children }: { children: React.ReactNode }) {
 
                 .filter-group label {
                     display: block;
-                    font-size: 13px;
+                    font-size: var(--text-xs);
                     font-weight: 700;
-                    color: #94A3B8;
+                    color: var(--text-muted);
                     margin-bottom: 12px;
                 }
 
@@ -551,24 +551,24 @@ function NavContent({ children }: { children: React.ReactNode }) {
                 .option-chip {
                     padding: 6px 10px;
                     border-radius: 10px;
-                    font-size: 12px;
+                    font-size: var(--text-xs);
                     font-weight: 600;
-                    background: #F8FAFC;
-                    color: #64748B;
-                    border: 1px solid #F1F5F9;
+                    background: var(--bg-surface);
+                    color: var(--text-secondary);
+                    border: 1px solid var(--border-subtle);
                     cursor: pointer;
                     transition: all 0.2s;
                     text-align: center;
                 }
 
                 .option-chip:hover {
-                    background: #F1F5F9;
+                    background: var(--border-subtle);
                 }
 
                 .option-chip.selected {
-                    background: #1C1C1E;
-                    color: white;
-                    border-color: #1C1C1E;
+                    background: var(--text-primary);
+                    color: var(--text-inverse);
+                    border-color: var(--text-primary);
                 }
 
                 .status-filter-row {
@@ -584,20 +584,20 @@ function NavContent({ children }: { children: React.ReactNode }) {
                     border: none;
                     padding: 0;
                     cursor: pointer;
-                    font-size: 14px;
+                    font-size: var(--text-sm);
                     font-weight: 600;
-                    color: #64748B;
+                    color: var(--text-secondary);
                 }
 
                 .status-btn.on {
-                    color: #1C1C1E;
+                    color: var(--text-primary);
                 }
 
                 .check-box {
                     width: 20px;
                     height: 20px;
                     border-radius: 6px;
-                    border: 2px solid #E2E8F0;
+                    border: 2px solid var(--border-default);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -605,9 +605,9 @@ function NavContent({ children }: { children: React.ReactNode }) {
                 }
 
                 .status-btn.on .check-box {
-                    background: #1C1C1E;
-                    border-color: #1C1C1E;
-                    color: white;
+                    background: var(--text-primary);
+                    border-color: var(--text-primary);
+                    color: var(--text-inverse);
                 }
 
                 .filter-footer {
@@ -616,28 +616,28 @@ function NavContent({ children }: { children: React.ReactNode }) {
                     align-items: center;
                     margin-top: 24px;
                     padding-top: 16px;
-                    border-top: 1px solid #F1F5F9;
+                    border-top: 1px solid var(--border-subtle);
                 }
 
                 .reset-btn {
                     background: none;
                     border: none;
-                    color: #94A3B8;
-                    font-size: 14px;
+                    color: var(--text-muted);
+                    font-size: var(--text-sm);
                     font-weight: 600;
                     cursor: pointer;
                 }
 
                 .apply-btn {
-                    background: #1C1C1E;
-                    color: white;
+                    background: var(--text-primary);
+                    color: var(--text-inverse);
                     border: none;
                     padding: 8px 20px;
-                    border-radius: 12px;
-                    font-size: 14px;
+                    border-radius: var(--radius-md);
+                    font-size: var(--text-sm);
                     font-weight: 700;
                     cursor: pointer;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    box-shadow: var(--shadow-sm);
                 }
 
                 .calendar-main-content {
@@ -652,7 +652,7 @@ function NavContent({ children }: { children: React.ReactNode }) {
                     width: 56px;
                     height: 56px;
                     border-radius: 50%;
-                    background: #25405E; /* Reference image dark blue FAB */
+                    background: var(--accent-primary);
                     display: flex;
                     align-items: center;
                     justify-content: center;

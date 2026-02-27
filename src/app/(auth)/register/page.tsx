@@ -237,33 +237,33 @@ export default function RegisterPage() {
           align-items: center;
           justify-content: center;
           padding: 40px 20px;
-          background: #FFFFFF;
+          background: var(--bg-base);
         }
 
         .auth-card {
           width: 100%;
           max-width: 500px;
           padding: 40px 30px;
-          background: #FFFFFF;
-          border-radius: 24px;
-          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+          background: var(--bg-elevated);
+          border-radius: var(--radius-xl);
+          box-shadow: var(--shadow-md);
           text-align: center;
           max-height: 90vh;
           overflow-y: auto;
-          border: 1px solid #F1F5F9;
+          border: 1px solid var(--border-subtle);
         }
 
         .auth-title {
-          font-size: 28px;
+          font-size: var(--text-xl);
           font-weight: 800;
           margin-bottom: 8px;
-          color: #1E293B;
+          color: var(--text-primary);
           letter-spacing: -1px;
         }
 
         .auth-subtitle {
-          font-size: 14px;
-          color: #64748B;
+          font-size: var(--text-sm);
+          color: var(--text-secondary);
           margin-bottom: 32px;
         }
 
@@ -287,9 +287,9 @@ export default function RegisterPage() {
 
         label {
           display: block;
-          font-size: 12px;
+          font-size: var(--text-xs);
           font-weight: 700;
-          color: #475569;
+          color: var(--text-secondary);
           margin-bottom: 8px;
           margin-left: 2px;
         }
@@ -297,28 +297,28 @@ export default function RegisterPage() {
         input, select {
           width: 100%;
           padding: 14px 16px;
-          border-radius: 12px;
-          background: #F8FAFC;
-          border: 1px solid #E2E8F0;
-          color: #1E293B;
-          font-size: 15px;
+          border-radius: var(--radius-md);
+          background: var(--bg-surface);
+          border: 1px solid var(--border-default);
+          color: var(--text-primary);
+          font-size: var(--text-sm);
           transition: all 0.2s ease;
           outline: none;
         }
 
         input:focus, select:focus {
-          background: #FFFFFF;
-          border-color: #3B82F6;
-          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+          background: var(--bg-elevated);
+          border-color: var(--border-focus);
+          box-shadow: 0 0 0 4px var(--accent-glow);
         }
 
         .check-btn {
           white-space: nowrap;
           padding: 0 16px;
-          border-radius: 12px;
-          background: #334155;
-          color: white;
-          font-size: 13px;
+          border-radius: var(--radius-md);
+          background: var(--schedule-gray-text);
+          color: var(--text-inverse);
+          font-size: var(--text-xs);
           font-weight: 600;
           border: none;
           cursor: pointer;
@@ -326,7 +326,7 @@ export default function RegisterPage() {
         }
 
         .check-btn.available {
-          background: #10B981;
+          background: var(--success);
         }
 
         .check-btn:disabled {
@@ -341,31 +341,31 @@ export default function RegisterPage() {
         }
 
         .agreement-box {
-          background: #F8FAFC;
+          background: var(--bg-surface);
           padding: 16px;
-          border-radius: 16px;
-          border: 1px solid #E2E8F0;
+          border-radius: var(--radius-lg);
+          border: 1px solid var(--border-default);
         }
 
         .agreement-title {
-          color: #1E293B;
+          color: var(--text-primary);
           margin-bottom: 10px;
-          font-size: 13px;
+          font-size: var(--text-xs);
           font-weight: 800;
         }
 
         .agreement-text {
           height: 100px;
           overflow-y: auto;
-          background: #FFFFFF;
+          background: var(--bg-elevated);
           padding: 12px;
-          border-radius: 8px;
-          font-size: 11px;
-          color: #64748B;
+          border-radius: var(--radius-sm);
+          font-size: var(--text-xs);
+          color: var(--text-secondary);
           line-height: 1.6;
           margin-bottom: 12px;
           white-space: pre-wrap;
-          border: 1px solid #F1F5F9;
+          border: 1px solid var(--border-subtle);
         }
 
         .checkbox-label {
@@ -373,37 +373,37 @@ export default function RegisterPage() {
           align-items: center;
           gap: 10px;
           cursor: pointer;
-          font-size: 12px;
+          font-size: var(--text-xs);
           font-weight: 600;
-          color: #475569;
+          color: var(--text-secondary);
         }
 
         .checkbox-label input {
           width: 18px;
           height: 18px;
-          accent-color: #3B82F6;
+          accent-color: var(--accent-primary);
         }
 
         .error-message {
           padding: 14px;
-          border-radius: 12px;
-          background: #FEF2F2;
-          color: #EF4444;
-          font-size: 14px;
+          border-radius: var(--radius-md);
+          background: var(--error-bg);
+          color: var(--error);
+          font-size: var(--text-sm);
           font-weight: 600;
           margin: 20px 0;
-          border: 1px solid #FEE2E2;
+          border: 1px solid var(--error-border);
           text-align: center;
         }
 
         .auth-button {
           width: 100%;
           padding: 16px;
-          border-radius: 14px;
-          background: #3B82F6;
-          color: white;
+          border-radius: var(--radius-md);
+          background: var(--accent-primary);
+          color: var(--text-inverse);
           font-weight: 800;
-          font-size: 16px;
+          font-size: var(--text-base);
           border: none;
           cursor: pointer;
           transition: all 0.3s ease;
@@ -411,7 +411,7 @@ export default function RegisterPage() {
         }
 
         .auth-button:hover {
-          background: #2563EB;
+          background: var(--accent-primary-hover);
           transform: translateY(-2px);
         }
 
@@ -422,12 +422,12 @@ export default function RegisterPage() {
 
         .auth-footer {
           margin-top: 28px;
-          font-size: 14px;
-          color: #64748B;
+          font-size: var(--text-sm);
+          color: var(--text-secondary);
         }
 
         .auth-footer a {
-          color: #3B82F6;
+          color: var(--accent-primary);
           font-weight: 700;
           text-decoration: none;
           margin-left: 4px;
@@ -437,7 +437,7 @@ export default function RegisterPage() {
           width: 5px;
         }
         .auth-card::-webkit-scrollbar-thumb, .agreement-text::-webkit-scrollbar-thumb {
-          background: #E2E8F0;
+          background: var(--border-default);
           border-radius: 10px;
         }
       `}</style>

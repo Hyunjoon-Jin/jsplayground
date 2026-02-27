@@ -331,13 +331,13 @@ export default function DayView({ currentDate }: DayViewProps) {
                 }
 
                 .date-main {
-                    font-size: 22px;
+                    font-size: var(--text-lg);
                     font-weight: 800;
                     color: var(--text-primary);
                 }
 
                 .date-sub {
-                    font-size: 15px;
+                    font-size: var(--text-sm);
                     font-weight: 600;
                     color: var(--accent-primary);
                 }
@@ -360,7 +360,7 @@ export default function DayView({ currentDate }: DayViewProps) {
 
                 .time-label {
                     height: 70px;
-                    font-size: 12px;
+                    font-size: var(--text-xs);
                     font-weight: 500;
                     color: var(--text-muted);
                     text-align: right;
@@ -383,7 +383,7 @@ export default function DayView({ currentDate }: DayViewProps) {
                     left: 0;
                     right: 0;
                     height: 2px;
-                    background: #EF4444;
+                    background: var(--accent-primary);
                     z-index: 10;
                 }
 
@@ -393,9 +393,9 @@ export default function DayView({ currentDate }: DayViewProps) {
                     top: -4px;
                     width: 10px;
                     height: 10px;
-                    background: #EF4444;
+                    background: var(--accent-primary);
                     border-radius: 50%;
-                    border: 2px solid white;
+                    border: 2px solid var(--bg-elevated);
                     box-shadow: 0 0 4px rgba(0,0,0,0.2);
                 }
 
@@ -405,7 +405,7 @@ export default function DayView({ currentDate }: DayViewProps) {
                     right: 12px;
                     border-radius: 12px;
                     padding: 12px 16px;
-                    color: white;
+                    color: var(--text-inverse);
                     z-index: 5;
                     display: flex;
                     flex-direction: column;
@@ -427,7 +427,7 @@ export default function DayView({ currentDate }: DayViewProps) {
                 }
 
                 .card-title {
-                    font-size: 15px;
+                    font-size: var(--text-sm);
                     font-weight: 700;
                     white-space: nowrap;
                     overflow: hidden;
@@ -435,13 +435,13 @@ export default function DayView({ currentDate }: DayViewProps) {
                 }
 
                 .card-time {
-                    font-size: 11px;
+                    font-size: var(--text-xs);
                     font-weight: 600;
                     opacity: 0.9;
                 }
 
                 .card-desc {
-                    font-size: 13px;
+                    font-size: var(--text-sm);
                     opacity: 0.8;
                     display: -webkit-box;
                     -webkit-line-clamp: 2;
@@ -449,10 +449,10 @@ export default function DayView({ currentDate }: DayViewProps) {
                     overflow: hidden;
                 }
 
-                .day-schedule-card.meeting { background: #3B82F6; }
-                .day-schedule-card.appointment { background: #EF4444; }
-                .day-schedule-card.important { background: #10B981; }
-                .day-schedule-card.default { background: #94A3B8; }
+                .day-schedule-card.meeting { background: var(--schedule-blue); }
+                .day-schedule-card.appointment { background: var(--schedule-red); }
+                .day-schedule-card.important { background: var(--schedule-green); }
+                .day-schedule-card.default { background: var(--schedule-gray); }
 
                 .day-schedule-card.resizing {
                     z-index: 100 !important;

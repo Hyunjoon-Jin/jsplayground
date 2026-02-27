@@ -97,7 +97,7 @@ select:focus {
   position: absolute;
   left: 4px;
   right: 4px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 8px 10px;
   font-family: var(--font-base);
   border-left: 4px solid transparent;
@@ -115,30 +115,30 @@ select:focus {
 
 .day-schedule-card.meeting,
 .week-schedule-card.meeting {
-  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
-  border-left-color: #3B82F6;
-  color: #1E40AF;
+  background: linear-gradient(135deg, var(--schedule-blue-light) 0%, var(--schedule-blue-pale) 100%);
+  border-left-color: var(--schedule-blue);
+  color: var(--schedule-blue-text);
 }
 
 .day-schedule-card.appointment,
 .week-schedule-card.appointment {
-  background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
-  border-left-color: #10B981;
-  color: #065F46;
+  background: linear-gradient(135deg, var(--schedule-green-light) 0%, var(--schedule-green-pale) 100%);
+  border-left-color: var(--schedule-green);
+  color: var(--schedule-green-text);
 }
 
 .day-schedule-card.important,
 .week-schedule-card.important {
-  background: linear-gradient(135deg, #FFF1F2 0%, #FFE4E6 100%);
-  border-left-color: #F43F5E;
-  color: #9F1239;
+  background: linear-gradient(135deg, var(--schedule-rose-light) 0%, var(--schedule-rose-pale) 100%);
+  border-left-color: var(--schedule-rose);
+  color: var(--schedule-rose-text);
 }
 
 .day-schedule-card.default,
 .week-schedule-card.default {
-  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
-  border-left-color: #94A3B8;
-  color: #334155;
+  background: linear-gradient(135deg, var(--bg-surface) 0%, var(--border-subtle) 100%);
+  border-left-color: var(--schedule-gray);
+  color: var(--schedule-gray-text);
 }
 
 .day-schedule-card.all-day,
@@ -158,31 +158,31 @@ select:focus {
 
 .all-day-tag,
 .no-time-tag {
-  font-size: 10px;
+  font-size: var(--text-xs);
   padding: 2px 6px;
   border-radius: 4px;
   font-weight: 800;
 }
 
 .all-day-tag {
-  background: #1E293B;
-  color: white;
+  background: var(--text-primary);
+  color: var(--text-inverse);
 }
 
 .no-time-tag {
-  background: #CBD5E1;
-  color: #1E293B;
+  background: var(--border-default);
+  color: var(--text-primary);
 }
 
 .card-type {
-  font-size: 11px;
+  font-size: var(--text-xs);
   font-weight: 600;
   opacity: 0.8;
 }
 
 .card-title-main,
 .card-title {
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 800;
   margin-bottom: 2px;
   white-space: nowrap;
@@ -192,7 +192,7 @@ select:focus {
 
 .card-time-range,
 .card-time {
-  font-size: 11px;
+  font-size: var(--text-xs);
   font-weight: 500;
   opacity: 0.7;
 }

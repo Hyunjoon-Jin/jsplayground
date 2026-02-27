@@ -12,6 +12,8 @@
   /* === Brand / Accent === */
   --accent-primary: #3B82F6;
   /* 메인 블루 (iOS 스타일) */
+  --accent-primary-hover: #2563EB;
+  /* 호버 시 진한 블루 */
   --accent-secondary: #60A5FA;
   /* 연한 블루 */
   --accent-glow: rgba(59, 130, 246, 0.15);
@@ -29,6 +31,7 @@
   --border-subtle: #F1F5F9;
   --border-default: #E2E8F0;
   --border-focus: #3B82F6;
+  --slate-300: #CBD5E1;
 
   /* === 일정 유형 컬러 (레퍼런스 이미지 기반) === */
   --schedule-blue: #3B82F6;
@@ -37,10 +40,25 @@
   --schedule-green: #10B981;
   --schedule-gray: #94A3B8;
 
+  /* === 일정 카드 그라디언트 팔레트 === */
+  --schedule-blue-light: #EFF6FF;
+  --schedule-blue-pale: #DBEAFE;
+  --schedule-blue-text: #1E40AF;
+  --schedule-green-light: #ECFDF5;
+  --schedule-green-pale: #D1FAE5;
+  --schedule-green-text: #065F46;
+  --schedule-rose: #F43F5E;
+  --schedule-rose-light: #FFF1F2;
+  --schedule-rose-pale: #FFE4E6;
+  --schedule-rose-text: #9F1239;
+  --schedule-gray-text: #334155;
+
   /* === 상태 === */
   --success: #10B981;
   --warning: #F59E0B;
   --error: #EF4444;
+  --error-bg: #FEF2F2;
+  --error-border: #FEE2E2;
   --info: #3B82F6;
 
   /* === 글래스모피즘 (라이트 모드용) === */

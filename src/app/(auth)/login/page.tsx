@@ -85,31 +85,31 @@ export default function LoginPage() {
           align-items: center;
           justify-content: center;
           padding: 24px;
-          background: #FFFFFF;
+          background: var(--bg-base);
         }
 
         .auth-card {
           width: 100%;
           max-width: 420px;
           padding: 48px 32px;
-          background: #FFFFFF;
-          border-radius: 24px;
-          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+          background: var(--bg-elevated);
+          border-radius: var(--radius-xl);
+          box-shadow: var(--shadow-md);
           text-align: center;
-          border: 1px solid #F1F5F9;
+          border: 1px solid var(--border-subtle);
         }
 
         .auth-title {
-          font-size: 32px;
+          font-size: var(--text-2xl);
           font-weight: 800;
           margin-bottom: 8px;
-          color: #1E293B;
+          color: var(--text-primary);
           letter-spacing: -1px;
         }
 
         .auth-subtitle {
-          font-size: 15px;
-          color: #64748B;
+          font-size: var(--text-sm);
+          color: var(--text-secondary);
           margin-bottom: 40px;
         }
 
@@ -123,9 +123,9 @@ export default function LoginPage() {
 
         .form-group label {
           display: block;
-          font-size: 13px;
+          font-size: var(--text-xs);
           font-weight: 700;
-          color: #475569;
+          color: var(--text-secondary);
           margin-bottom: 10px;
           margin-left: 2px;
         }
@@ -133,41 +133,41 @@ export default function LoginPage() {
         .form-group input {
           width: 100%;
           padding: 16px;
-          border-radius: 14px;
-          background: #F8FAFC;
-          border: 1px solid #E2E8F0;
-          color: #1E293B;
-          font-size: 16px;
+          border-radius: var(--radius-md);
+          background: var(--bg-surface);
+          border: 1px solid var(--border-default);
+          color: var(--text-primary);
+          font-size: var(--text-base);
           transition: all 0.25s ease;
           outline: none;
         }
 
         .form-group input:focus {
-          background: #FFFFFF;
-          border-color: #3B82F6;
-          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+          background: var(--bg-elevated);
+          border-color: var(--border-focus);
+          box-shadow: 0 0 0 4px var(--accent-glow);
         }
 
         .error-message {
           padding: 14px;
-          border-radius: 12px;
-          background: #FEF2F2;
-          color: #EF4444;
-          font-size: 14px;
+          border-radius: var(--radius-md);
+          background: var(--error-bg);
+          color: var(--error);
+          font-size: var(--text-sm);
           font-weight: 600;
           margin-bottom: 24px;
-          border: 1px solid #FEE2E2;
+          border: 1px solid var(--error-border);
           text-align: center;
         }
 
         .auth-button {
           width: 100%;
           padding: 18px;
-          border-radius: 16px;
-          background: #3B82F6;
-          color: white;
+          border-radius: var(--radius-lg);
+          background: var(--accent-primary);
+          color: var(--text-inverse);
           font-weight: 800;
-          font-size: 17px;
+          font-size: var(--text-md);
           border: none;
           cursor: pointer;
           transition: all 0.3s ease;
@@ -175,7 +175,7 @@ export default function LoginPage() {
         }
 
         .auth-button:hover {
-          background: #2563EB;
+          background: var(--accent-primary-hover);
           transform: translateY(-2px);
         }
 
@@ -197,26 +197,26 @@ export default function LoginPage() {
           left: 0;
           right: 0;
           height: 1px;
-          background: #F1F5F9;
+          background: var(--border-subtle);
         }
 
         .auth-divider span {
           position: relative;
-          background: #FFFFFF;
+          background: var(--bg-elevated);
           padding: 0 16px;
-          font-size: 13px;
-          color: #94A3B8;
+          font-size: var(--text-xs);
+          color: var(--text-muted);
           font-weight: 500;
         }
 
         .auth-footer {
           margin-top: 8px;
-          font-size: 15px;
-          color: #64748B;
+          font-size: var(--text-sm);
+          color: var(--text-secondary);
         }
 
         .auth-footer a {
-          color: #3B82F6;
+          color: var(--accent-primary);
           font-weight: 700;
           text-decoration: none;
           margin-left: 6px;

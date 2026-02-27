@@ -222,7 +222,7 @@ export default function ProfilePage() {
                 .profile-container {
                     padding: 24px 20px;
                     padding-bottom: 100px;
-                    background: #F8FAFC;
+                    background: var(--bg-surface);
                     min-height: 100vh;
                 }
 
@@ -231,17 +231,17 @@ export default function ProfilePage() {
                 }
 
                 .profile-header h1 {
-                    font-size: 24px;
+                    font-size: var(--text-lg);
                     font-weight: 800;
                     color: var(--text-primary);
                 }
 
                 .profile-card {
-                    background: white;
-                    border-radius: 20px;
+                    background: var(--bg-elevated);
+                    border-radius: var(--radius-lg);
                     padding: 24px;
                     margin-bottom: 24px;
-                    border: 1px solid #E2E8F0;
+                    border: 1px solid var(--border-default);
                 }
 
                 .avatar-section {
@@ -249,7 +249,7 @@ export default function ProfilePage() {
                     align-items: center;
                     gap: 16px;
                     padding-bottom: 24px;
-                    border-bottom: 1px solid #F1F5F9;
+                    border-bottom: 1px solid var(--border-subtle);
                     margin-bottom: 24px;
                 }
 
@@ -257,22 +257,22 @@ export default function ProfilePage() {
                     width: 70px;
                     height: 70px;
                     border-radius: 24px;
-                    background: #F1F5F9;
+                    background: var(--border-subtle);
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    color: #94A3B8;
+                    color: var(--text-muted);
                 }
 
                 .display-name {
-                    font-size: 19px;
+                    font-size: var(--text-md);
                     font-weight: 800;
                     color: var(--text-primary);
                     margin-bottom: 4px;
                 }
 
                 .email {
-                    font-size: 14px;
+                    font-size: var(--text-sm);
                     color: var(--text-secondary);
                     font-weight: 500;
                 }
@@ -291,7 +291,7 @@ export default function ProfilePage() {
 
                 .input-group label {
                     display: block;
-                    font-size: 12px;
+                    font-size: var(--text-xs);
                     font-weight: 700;
                     color: var(--text-secondary);
                     margin-bottom: 8px;
@@ -301,28 +301,28 @@ export default function ProfilePage() {
                 input, select {
                     width: 100%;
                     padding: 12px 16px;
-                    border-radius: 12px;
-                    background: #F8FAFC;
-                    border: 1px solid #E2E8F0;
-                    font-size: 15px;
+                    border-radius: var(--radius-md);
+                    background: var(--bg-surface);
+                    border: 1px solid var(--border-default);
+                    font-size: var(--text-sm);
                     color: var(--text-primary);
                     outline: none;
                     transition: all 0.2s;
                 }
 
                 input:focus, select:focus {
-                    border-color: var(--accent-primary);
-                    background: white;
-                    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
+                    border-color: var(--border-focus);
+                    background: var(--bg-elevated);
+                    box-shadow: 0 0 0 4px var(--accent-glow);
                 }
 
                 .save-btn {
                     margin-top: 8px;
                     width: 100%;
                     padding: 14px;
-                    border-radius: 12px;
+                    border-radius: var(--radius-md);
                     background: var(--accent-primary);
-                    color: white;
+                    color: var(--text-inverse);
                     font-weight: 700;
                     border: none;
                     display: flex;
@@ -338,10 +338,10 @@ export default function ProfilePage() {
                 }
 
                 .menu-section {
-                    background: white;
-                    border-radius: 20px;
+                    background: var(--bg-elevated);
+                    border-radius: var(--radius-lg);
                     overflow: hidden;
-                    border: 1px solid #E2E8F0;
+                    border: 1px solid var(--border-default);
                 }
 
                 .menu-item {
@@ -350,9 +350,9 @@ export default function ProfilePage() {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    background: white;
+                    background: var(--bg-elevated);
                     border: none;
-                    border-bottom: 1px solid #F1F5F9;
+                    border-bottom: 1px solid var(--border-subtle);
                     cursor: pointer;
                 }
 
@@ -365,15 +365,15 @@ export default function ProfilePage() {
                     align-items: center;
                     gap: 14px;
                     font-weight: 600;
-                    font-size: 15px;
+                    font-size: var(--text-sm);
                     color: var(--text-primary);
                 }
 
-                .menu-label.logout { color: #64748B; }
-                .menu-label.delete { color: #EF4444; }
+                .menu-label.logout { color: var(--text-secondary); }
+                .menu-label.delete { color: var(--error); }
 
                 .chevron {
-                    color: #CBD5E1;
+                    color: var(--slate-300);
                 }
 
                 .loading-container {
@@ -386,7 +386,7 @@ export default function ProfilePage() {
                 .spinner {
                     width: 30px;
                     height: 30px;
-                    border: 3px solid #F1F5F9;
+                    border: 3px solid var(--border-subtle);
                     border-top-color: var(--accent-primary);
                     border-radius: 50%;
                     animation: spin 0.8s linear infinite;
@@ -402,7 +402,7 @@ export default function ProfilePage() {
                     left: 0;
                     right: 0;
                     bottom: 0;
-                    background: rgba(0, 0, 0, 0.4);
+                    background: var(--bg-overlay);
                     backdrop-filter: blur(4px);
                     display: flex;
                     align-items: center;
@@ -412,8 +412,8 @@ export default function ProfilePage() {
                 }
 
                 .modal-content {
-                    background: white;
-                    border-radius: 24px;
+                    background: var(--bg-elevated);
+                    border-radius: var(--radius-xl);
                     padding: 32px 24px;
                     width: 100%;
                     max-width: 400px;
@@ -430,19 +430,19 @@ export default function ProfilePage() {
                 }
 
                 .modal-icon.warning {
-                    color: #EF4444;
+                    color: var(--error);
                     margin-bottom: 16px;
                 }
 
                 .modal-content h3 {
-                    font-size: 20px;
+                    font-size: var(--text-md);
                     font-weight: 800;
                     margin-bottom: 12px;
                     color: var(--text-primary);
                 }
 
                 .modal-content p {
-                    font-size: 15px;
+                    font-size: var(--text-sm);
                     color: var(--text-secondary);
                     line-height: 1.6;
                     margin-bottom: 24px;
@@ -456,18 +456,18 @@ export default function ProfilePage() {
 
                 .cancel-btn {
                     padding: 14px;
-                    border-radius: 12px;
-                    background: #F1F5F9;
-                    color: #64748B;
+                    border-radius: var(--radius-md);
+                    background: var(--bg-surface);
+                    color: var(--text-secondary);
                     font-weight: 700;
                     border: none;
                 }
 
                 .confirm-delete-btn {
                     padding: 14px;
-                    border-radius: 12px;
-                    background: #EF4444;
-                    color: white;
+                    border-radius: var(--radius-md);
+                    background: var(--error);
+                    color: var(--text-inverse);
                     font-weight: 700;
                     border: none;
                 }

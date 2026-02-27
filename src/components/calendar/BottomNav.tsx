@@ -67,7 +67,7 @@ export default function BottomNav() {
 
         .nav-item span {
           font-size: 10px;
-          font-weight: var(--weight-medium);
+          font-weight: 500;
         }
 
         .nav-item.active {

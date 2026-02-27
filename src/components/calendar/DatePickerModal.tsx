@@ -170,7 +170,7 @@ export default function DatePickerModal({ isOpen, currentDate: initialDate, onCl
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0, 0, 0, 0.2);
+          background: var(--bg-overlay);
           backdrop-filter: blur(2px);
           display: flex;
           align-items: center;
@@ -185,13 +185,13 @@ export default function DatePickerModal({ isOpen, currentDate: initialDate, onCl
         }
 
         .picker-content {
-          background: white;
+          background: var(--bg-elevated);
           width: 340px;
           min-height: 400px;
-          border-radius: 16px;
+          border-radius: var(--radius-md);
           padding: 24px;
-          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
-          border: 1px solid #E2E8F0;
+          box-shadow: var(--shadow-md);
+          border: 1px solid var(--border-default);
           animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -217,13 +217,13 @@ export default function DatePickerModal({ isOpen, currentDate: initialDate, onCl
         }
 
         .p-title-btn:hover {
-            background: #F8FAFC;
+            background: var(--bg-surface);
         }
 
         .p-title {
-          font-size: 19px;
+          font-size: var(--text-md);
           font-weight: 500;
-          color: #1A1A1A;
+          color: var(--text-primary);
           letter-spacing: -0.01em;
           margin: 0;
         }
@@ -235,16 +235,16 @@ export default function DatePickerModal({ isOpen, currentDate: initialDate, onCl
           align-items: center;
           justify-content: center;
           border-radius: 10px;
-          color: #64748B;
-          background: white;
-          border: 1px solid #F1F5F9;
+          color: var(--text-secondary);
+          background: var(--bg-elevated);
+          border: 1px solid var(--border-subtle);
           transition: all 0.2s;
           cursor: pointer;
         }
 
         .p-nav-btn:hover {
-          background: #F8FAFC;
-          border-color: #E2E8F0;
+          background: var(--bg-surface);
+          border-color: var(--border-default);
         }
 
         .p-grid-header {
@@ -255,9 +255,9 @@ export default function DatePickerModal({ isOpen, currentDate: initialDate, onCl
 
         .p-weekday {
           text-align: center;
-          font-size: 15px;
+          font-size: var(--text-sm);
           font-weight: 500;
-          color: #94A3B8;
+          color: var(--text-muted);
         }
 
         .p-grid {
@@ -281,45 +281,46 @@ export default function DatePickerModal({ isOpen, currentDate: initialDate, onCl
           transition: all 0.1s;
           background: transparent;
           border: none;
-          color: #1A1A1A;
+          color: var(--text-primary);
           cursor: pointer;
         }
 
         .p-day-btn {
           height: 44px;
-          font-size: 18px;
+          font-size: var(--text-md);
           font-weight: 500;
         }
 
         .p-month-btn {
             height: 60px;
-            font-size: 17px;
+            font-size: var(--text-md);
             font-weight: 500;
         }
 
         .p-day-btn:hover:not(.p-selected), .p-month-btn:hover:not(.p-selected) {
-          background: #F8FAFC;
+          background: var(--bg-surface);
         }
 
         .p-day-btn.p-other {
-          color: #CBD5E1;
+          color: var(--slate-300);
           visibility: visible;
           opacity: 0.5;
         }
 
         .p-day-btn.p-selected, .p-month-btn.p-selected {
-          background: #1C1C1E !important;
-          color: white !important;
+          background: var(--accent-primary);
+          color: var(--text-inverse);
           font-weight: 600;
+          box-shadow: var(--shadow-glow);
         }
 
         .p-day-btn.p-today:not(.p-selected) {
-          color: #1C1C1E;
+          color: var(--accent-primary);
           font-weight: 800;
         }
 
         .p-month-btn.p-focus {
-            background: #F1F5F9;
+            background: var(--border-subtle);
             font-weight: 600;
         }
       `}</style>

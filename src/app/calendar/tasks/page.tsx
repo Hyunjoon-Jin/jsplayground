@@ -74,9 +74,9 @@ export default function TasksPage() {
     };
 
     const importanceLabel: any = {
-        high: { text: '높음', color: '#EF4444' },
-        medium: { text: '보통', color: '#F59E0B' },
-        low: { text: '낮음', color: '#10B981' }
+        high: { text: '높음', color: 'var(--error)' },
+        medium: { text: '보통', color: 'var(--warning)' },
+        low: { text: '낮음', color: 'var(--success)' }
     };
 
     if (loading) return <div className="loading-container flex-center">데이터를 불러오는 중...</div>;
@@ -218,29 +218,29 @@ export default function TasksPage() {
                     margin-bottom: 24px;
                 }
 
-                .page-title { font-size: 24px; font-weight: 800; }
+                .page-title { font-size: var(--text-lg); font-weight: 800; }
 
                 .add-task-btn {
                     display: flex;
                     align-items: center;
                     gap: 6px;
                     background: var(--accent-primary);
-                    color: white;
+                    color: var(--text-inverse);
                     padding: 10px 16px;
-                    border-radius: 14px;
+                    border-radius: var(--radius-md);
                     font-weight: 700;
-                    font-size: 14px;
+                    font-size: var(--text-sm);
                 }
 
                 .search-bar {
-                    background: white;
-                    border-radius: 16px;
+                    background: var(--bg-elevated);
+                    border-radius: var(--radius-lg);
                     padding: 14px 18px;
                     display: flex;
                     align-items: center;
                     gap: 12px;
                     margin-bottom: 16px;
-                    border: 1px solid #F1F5F9;
+                    border: 1px solid var(--border-subtle);
                 }
 
                 .search-bar input {
@@ -248,7 +248,7 @@ export default function TasksPage() {
                     border: none;
                     background: transparent;
                     outline: none;
-                    font-size: 15px;
+                    font-size: var(--text-sm);
                 }
 
                 .filter-scroll {
@@ -264,10 +264,10 @@ export default function TasksPage() {
 
                 .filter-chip {
                     padding: 8px 16px;
-                    background: white;
-                    border: 1px solid #E2E8F0;
-                    border-radius: 12px;
-                    font-size: 13px;
+                    background: var(--bg-elevated);
+                    border: 1px solid var(--border-default);
+                    border-radius: var(--radius-md);
+                    font-size: var(--text-xs);
                     font-weight: 700;
                     color: var(--text-muted);
                     white-space: nowrap;
@@ -275,9 +275,9 @@ export default function TasksPage() {
                 }
 
                 .filter-chip.active {
-                    background: #1E293B;
-                    color: white;
-                    border-color: #1E293B;
+                    background: var(--text-primary);
+                    color: var(--text-inverse);
+                    border-color: var(--text-primary);
                 }
 
                 .stats-cards {
@@ -289,7 +289,7 @@ export default function TasksPage() {
 
                 .stat-card {
                     padding: 16px;
-                    border-radius: 18px;
+                    border-radius: var(--radius-lg);
                     display: flex;
                     flex-direction: column;
                     align-items: center;
@@ -297,8 +297,8 @@ export default function TasksPage() {
                     text-align: center;
                 }
 
-                .stat-label { font-size: 11px; font-weight: 700; color: var(--text-muted); }
-                .stat-value { font-size: 18px; font-weight: 800; color: var(--accent-primary); }
+                .stat-label { font-size: var(--text-xs); font-weight: 700; color: var(--text-muted); }
+                .stat-value { font-size: var(--text-md); font-weight: 800; color: var(--accent-primary); }
 
                 .todo-list {
                     display: flex;
@@ -308,7 +308,7 @@ export default function TasksPage() {
 
                 .todo-item {
                     padding: 20px;
-                    border-radius: 20px;
+                    border-radius: var(--radius-lg);
                     border: 1px solid rgba(255, 255, 255, 0.5);
                     text-align: left;
                 }
@@ -320,13 +320,13 @@ export default function TasksPage() {
                     margin-bottom: 12px;
                 }
 
-                .todo-type-tag { font-size: 11px; font-weight: 700; opacity: 0.6; }
+                .todo-type-tag { font-size: var(--text-xs); font-weight: 700; opacity: 0.6; }
 
                 .todo-importance {
                     display: flex;
                     align-items: center;
                     gap: 4px;
-                    font-size: 11px;
+                    font-size: var(--text-xs);
                     font-weight: 800;
                     padding: 2px 8px;
                     background: rgba(0, 0, 0, 0.05);
@@ -335,16 +335,16 @@ export default function TasksPage() {
 
                 .todo-d-day {
                     margin-left: auto;
-                    font-size: 12px;
+                    font-size: var(--text-xs);
                     font-weight: 900;
-                    color: #EF4444;
-                    background: #FEF2F2;
+                    color: var(--error);
+                    background: var(--error-bg);
                     padding: 2px 8px;
                     border-radius: 6px;
                 }
 
-                .todo-title { font-size: 17px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px; }
-                .todo-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
+                .todo-title { font-size: var(--text-md); font-weight: 800; color: var(--text-primary); margin-bottom: 6px; }
+                .todo-desc { font-size: var(--text-sm); color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
 
                 .todo-progress-section { margin-bottom: 16px; }
 
@@ -353,12 +353,12 @@ export default function TasksPage() {
                     justify-content: space-between;
                     margin-bottom: 6px;
                 }
-                .progress-label { font-size: 12px; font-weight: 700; color: var(--text-muted); }
-                .progress-percent { font-size: 12px; font-weight: 800; color: var(--accent-primary); }
+                .progress-label { font-size: var(--text-xs); font-weight: 700; color: var(--text-muted); }
+                .progress-percent { font-size: var(--text-xs); font-weight: 800; color: var(--accent-primary); }
 
                 .progress-bar-bg {
                     height: 8px;
-                    background: #F1F5F9;
+                    background: var(--border-subtle);
                     border-radius: 4px;
                     overflow: hidden;
                 }
@@ -374,7 +374,7 @@ export default function TasksPage() {
                     justify-content: space-between;
                     align-items: center;
                     padding-top: 14px;
-                    border-top: 1px dashed #E2E8F0;
+                    border-top: 1px dashed var(--border-default);
                 }
 
                 .todo-dates { display: flex; gap: 12px; }
@@ -382,29 +382,29 @@ export default function TasksPage() {
                     display: flex;
                     align-items: center;
                     gap: 4px;
-                    font-size: 12px;
+                    font-size: var(--text-xs);
                     font-weight: 600;
                     color: var(--text-muted);
                 }
-                .date-item.deadline { color: #64748B; }
+                .date-item.deadline { color: var(--text-secondary); }
 
                 .status-badge {
                     display: flex;
                     align-items: center;
                     gap: 4px;
-                    font-size: 12px;
+                    font-size: var(--text-xs);
                     font-weight: 800;
                 }
-                .status-badge.pending { color: #94A3B8; }
+                .status-badge.pending { color: var(--text-muted); }
                 .status-badge.in_progress { color: var(--accent-primary); }
-                .status-badge.completed { color: #10B981; }
+                .status-badge.completed { color: var(--success); }
 
                 .empty-state {
                     padding: 60px 0;
                     text-align: center;
-                    color: #CBD5E1;
+                    color: var(--border-default);
                 }
-                
+
                 .loading-container { min-height: 100vh; color: var(--text-muted); }
             `}</style>
         </div>

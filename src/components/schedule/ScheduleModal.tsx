@@ -184,7 +184,7 @@ export default function ScheduleModal({
       <div className="modal-content animate-slide-up">
         <header className="modal-header">
           <h2>{initialData ? '일정 수정' : '새 일정 등록'}</h2>
-          <button onClick={onClose} className="close-btn"><X size={24} /></button>
+          <button onClick={onClose} className="close-btn" aria-label="닫기"><X size={24} /></button>
         </header>
 
         <div className="modal-body">
@@ -393,7 +393,7 @@ export default function ScheduleModal({
                     left: 0;
                     right: 0;
                     bottom: 0;
-                    background: rgba(0, 0, 0, 0.4);
+                    background: var(--bg-overlay);
                     backdrop-filter: blur(4px);
                     display: flex;
                     align-items: flex-end;
@@ -404,8 +404,8 @@ export default function ScheduleModal({
                 .modal-content {
                     width: 100%;
                     max-width: 500px;
-                    background: white;
-                    border-radius: 24px 24px 0 0;
+                    background: var(--bg-elevated);
+                    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
                     padding: 24px 20px;
                     padding-bottom: calc(24px + var(--safe-area-bottom));
                 }
@@ -427,7 +427,7 @@ export default function ScheduleModal({
                 }
 
                 .modal-header h2 {
-                    font-size: 19px;
+                    font-size: var(--text-md);
                     font-weight: 800;
                     color: var(--text-primary);
                 }
@@ -437,10 +437,10 @@ export default function ScheduleModal({
                 .title-input {
                     width: 100%;
                     border: none;
-                    background: #F8FAFC;
+                    background: var(--bg-surface);
                     padding: 16px;
-                    border-radius: 12px;
-                    font-size: 18px;
+                    border-radius: var(--radius-md);
+                    font-size: var(--text-md);
                     font-weight: 700;
                     color: var(--text-primary);
                     margin-bottom: 20px;
@@ -454,18 +454,18 @@ export default function ScheduleModal({
                     width: 100%;
                     min-height: 80px;
                     padding: 14px;
-                    background: #F8FAFC;
+                    background: var(--bg-surface);
                     border: none;
-                    border-radius: 12px;
+                    border-radius: var(--radius-md);
                     resize: none;
-                    font-size: 14px;
+                    font-size: var(--text-sm);
                     color: var(--text-primary);
                     outline: none;
                 }
 
                 label {
                     display: block;
-                    font-size: 12px;
+                    font-size: var(--text-xs);
                     font-weight: 600;
                     color: var(--text-secondary);
                     margin-bottom: 6px;
@@ -475,10 +475,10 @@ export default function ScheduleModal({
                 select {
                     width: 100%;
                     padding: 12px;
-                    background: #F8FAFC;
+                    background: var(--bg-surface);
                     border: none;
-                    border-radius: 12px;
-                    font-size: 14px;
+                    border-radius: var(--radius-md);
+                    font-size: var(--text-sm);
                     color: var(--text-primary);
                     outline: none;
                 }
@@ -497,27 +497,27 @@ export default function ScheduleModal({
                     justify-content: center;
                     gap: 8px;
                     padding: 12px;
-                    background: #F1F5F9;
-                    border-radius: 14px;
+                    background: var(--bg-surface);
+                    border-radius: var(--radius-md);
                     cursor: pointer;
                     transition: all 0.2s;
                     border: 2px solid transparent;
                 }
 
                 .toggle-card.active {
-                    background: white;
+                    background: var(--bg-elevated);
                     border-color: var(--accent-primary);
-                    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+                    box-shadow: var(--shadow-md);
                 }
 
                 .toggle-card input { display: none; }
                 .toggle-card .emoji { font-size: 20px; }
-                .toggle-card .label { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+                .toggle-card .label { font-size: var(--text-sm); font-weight: 700; color: var(--text-primary); }
 
                 .time-config {
-                    background: #F8FAFC;
+                    background: var(--bg-surface);
                     padding: 16px;
-                    border-radius: 16px;
+                    border-radius: var(--radius-lg);
                     margin-bottom: 24px;
                     display: flex;
                     flex-direction: column;
@@ -538,7 +538,7 @@ export default function ScheduleModal({
                 }
 
                 .group-label {
-                    font-size: 13px;
+                    font-size: var(--text-sm);
                     font-weight: 700;
                 }
 
@@ -546,15 +546,15 @@ export default function ScheduleModal({
                     display: flex;
                     align-items: center;
                     gap: 8px;
-                    background: white;
+                    background: var(--bg-elevated);
                     padding: 8px 12px;
-                    border-radius: 12px;
-                    border: 1px solid #E2E8F0;
+                    border-radius: var(--radius-md);
+                    border: 1px solid var(--border-default);
                 }
 
                 .date-range-picker .arrow {
-                    color: #94A3B8;
-                    font-size: 14px;
+                    color: var(--text-muted);
+                    font-size: var(--text-sm);
                 }
 
                 .options-row {
@@ -577,7 +577,7 @@ export default function ScheduleModal({
                 .custom-checkbox {
                     width: 18px;
                     height: 18px;
-                    border: 2px solid #E2E8F0;
+                    border: 2px solid var(--border-default);
                     border-radius: 6px;
                     display: inline-block;
                     position: relative;
@@ -596,8 +596,8 @@ export default function ScheduleModal({
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
-                    color: white;
-                    font-size: 12px;
+                    color: var(--text-inverse);
+                    font-size: var(--text-xs);
                 }
 
                 .time-row {
@@ -606,27 +606,27 @@ export default function ScheduleModal({
                     gap: 12px;
                     color: var(--accent-primary);
                     margin-top: 4px;
-                    background: white;
+                    background: var(--bg-elevated);
                     padding: 8px 12px;
-                    border-radius: 12px;
-                    border: 1px solid #E2E8F0;
+                    border-radius: var(--radius-md);
+                    border: 1px solid var(--border-default);
                 }
 
                 .custom-date-picker-btn {
                     background: none;
                     border: none;
-                    font-size: 15px;
+                    font-size: var(--text-sm);
                     font-weight: 600;
                     color: var(--text-primary);
                     padding: 4px 8px;
-                    border-radius: 8px;
+                    border-radius: var(--radius-sm);
                     cursor: pointer;
                     transition: background 0.2s;
                     text-align: left;
                 }
 
                 .custom-date-picker-btn:hover {
-                    background: #F1F5F9;
+                    background: var(--bg-surface);
                 }
 
                 .time-selects {
@@ -645,21 +645,21 @@ export default function ScheduleModal({
                 }
 
                 .time-selects .sep {
-                    color: #94A3B8;
+                    color: var(--text-muted);
                     font-weight: 400;
                 }
 
                 .recurring-section {
                     padding: 16px;
-                    background: #F8FAFC;
-                    border-radius: 16px;
+                    background: var(--bg-surface);
+                    border-radius: var(--radius-lg);
                 }
 
                 .toggle-item-simple {
                     display: flex;
                     align-items: center;
                     gap: 10px;
-                    font-size: 14px;
+                    font-size: var(--text-sm);
                     font-weight: 600;
                     color: var(--text-secondary);
                     cursor: pointer;
@@ -668,7 +668,7 @@ export default function ScheduleModal({
                 .recurring-picker {
                     margin-top: 12px;
                     padding-top: 12px;
-                    border-top: 1px solid #E2E8F0;
+                    border-top: 1px solid var(--border-default);
                 }
 
                 .hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; }
@@ -682,27 +682,27 @@ export default function ScheduleModal({
 
                 .cancel-btn {
                     padding: 16px;
-                    border-radius: 14px;
+                    border-radius: var(--radius-md);
                     font-weight: 700;
                     color: var(--text-secondary);
-                    background: #F1F5F9;
+                    background: var(--bg-surface);
                 }
 
                 .delete-btn {
                     padding: 16px;
-                    border-radius: 14px;
+                    border-radius: var(--radius-md);
                     font-weight: 700;
-                    color: #EF4444;
-                    background: #FEF2F2;
+                    color: var(--error);
+                    background: var(--error-bg);
                 }
 
                 .save-btn {
                     padding: 16px;
-                    border-radius: 14px;
+                    border-radius: var(--radius-md);
                     background: var(--accent-primary);
-                    color: white;
+                    color: var(--text-inverse);
                     font-weight: 800;
-                    font-size: 16px;
+                    font-size: var(--text-base);
                 }
 
                 .save-btn:disabled { opacity: 0.5; }

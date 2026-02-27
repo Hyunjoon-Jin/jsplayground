@@ -115,7 +115,7 @@ export default function TodoModal({
             <div className="modal-content animate-slide-up">
                 <header className="modal-header">
                     <h2>{initialData ? '할 일 수정' : '새 할 일 등록'}</h2>
-                    <button onClick={onClose} className="close-btn"><X size={24} /></button>
+                    <button onClick={onClose} className="close-btn" aria-label="닫기"><X size={24} /></button>
                 </header>
 
                 <div className="modal-body">
@@ -265,7 +265,7 @@ export default function TodoModal({
                 .modal-overlay {
                     position: fixed;
                     top: 0; left: 0; right: 0; bottom: 0;
-                    background: rgba(0, 0, 0, 0.4);
+                    background: var(--bg-overlay);
                     backdrop-filter: blur(4px);
                     display: flex;
                     align-items: flex-end;
@@ -276,8 +276,8 @@ export default function TodoModal({
                 .modal-content {
                     width: 100%;
                     max-width: 500px;
-                    background: white;
-                    border-radius: 24px 24px 0 0;
+                    background: var(--bg-elevated);
+                    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
                     padding: 24px 20px;
                     padding-bottom: calc(24px + var(--safe-area-bottom));
                 }
@@ -298,16 +298,16 @@ export default function TodoModal({
                     margin-bottom: 24px;
                 }
 
-                .modal-header h2 { font-size: 19px; font-weight: 800; color: var(--text-primary); }
+                .modal-header h2 { font-size: var(--text-md); font-weight: 800; color: var(--text-primary); }
                 .close-btn { color: var(--text-muted); padding: 4px; }
 
                 .title-input {
                     width: 100%;
                     border: none;
-                    background: #F8FAFC;
-                    padding: 18px;
-                    border-radius: 12px;
-                    font-size: 18px;
+                    background: var(--bg-surface);
+                    padding: 16px;
+                    border-radius: var(--radius-md);
+                    font-size: var(--text-md);
                     font-weight: 700;
                     color: var(--text-primary);
                     margin-bottom: 20px;
@@ -321,40 +321,40 @@ export default function TodoModal({
                     width: 100%;
                     min-height: 80px;
                     padding: 14px;
-                    background: #F8FAFC;
+                    background: var(--bg-surface);
                     border: none;
-                    border-radius: 12px;
+                    border-radius: var(--radius-md);
                     resize: none;
-                    font-size: 14px;
+                    font-size: var(--text-sm);
                     color: var(--text-primary);
                     outline: none;
                 }
 
                 label {
                     display: block;
-                    font-size: 13px;
-                    font-weight: 700;
+                    font-size: var(--text-xs);
+                    font-weight: 600;
                     color: var(--text-secondary);
-                    margin-bottom: 8px;
-                    margin-left: 2px;
+                    margin-bottom: 6px;
+                    margin-left: 4px;
                 }
 
                 select {
                     width: 100%;
                     padding: 12px;
-                    background: #F8FAFC;
+                    background: var(--bg-surface);
                     border: none;
-                    border-radius: 12px;
-                    font-size: 14px;
+                    border-radius: var(--radius-md);
+                    font-size: var(--text-sm);
                     font-weight: 600;
                     color: var(--text-primary);
                     outline: none;
                 }
 
                 .status-progress-section {
-                    background: #F8FAFC;
+                    background: var(--bg-surface);
                     padding: 16px;
-                    border-radius: 16px;
+                    border-radius: var(--radius-lg);
                     margin-bottom: 20px;
                 }
 
@@ -367,20 +367,20 @@ export default function TodoModal({
                 .status-btn {
                     flex: 1;
                     padding: 10px;
-                    border-radius: 10px;
-                    font-size: 13px;
+                    border-radius: var(--radius-sm);
+                    font-size: var(--text-sm);
                     font-weight: 700;
-                    background: white;
+                    background: var(--bg-elevated);
                     color: var(--text-muted);
-                    border: 1px solid #E2E8F0;
+                    border: 1px solid var(--border-default);
                     transition: all 0.2s;
                 }
 
                 .status-btn.active {
                     background: var(--accent-primary);
-                    color: white;
+                    color: var(--text-inverse);
                     border-color: var(--accent-primary);
-                    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+                    box-shadow: var(--shadow-glow);
                 }
 
                 .progress-row { }
@@ -400,7 +400,7 @@ export default function TodoModal({
                 input[type="range"] {
                     width: 100%;
                     height: 6px;
-                    background: #E2E8F0;
+                    background: var(--border-default);
                     border-radius: 3px;
                     appearance: none;
                     outline: none;
@@ -413,8 +413,8 @@ export default function TodoModal({
                     background: var(--accent-primary);
                     border-radius: 50%;
                     cursor: pointer;
-                    border: 3px solid white;
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+                    border: 3px solid var(--bg-elevated);
+                    box-shadow: var(--shadow-sm);
                 }
 
                 .dates-section {
@@ -430,30 +430,30 @@ export default function TodoModal({
                     align-items: center;
                     gap: 8px;
                     padding: 12px;
-                    background: #F8FAFC;
-                    border-radius: 12px;
-                    font-size: 13px;
+                    background: var(--bg-surface);
+                    border-radius: var(--radius-md);
+                    font-size: var(--text-sm);
                     font-weight: 600;
-                    color: #64748B;
+                    color: var(--text-secondary);
                     border: 1px solid transparent;
                     position: relative;
                 }
 
                 .date-picker-trigger.selected {
-                    background: white;
-                    border-color: #E2E8F0;
+                    background: var(--bg-elevated);
+                    border-color: var(--border-default);
                     color: var(--text-primary);
                 }
 
                 .date-picker-trigger.d-day-active {
-                    border-color: #EF444430;
-                    background: #FEF2F2;
-                    color: #EF4444;
+                    border-color: var(--error);
+                    background: var(--error-bg);
+                    color: var(--error);
                 }
 
                 .clear-date {
                     margin-left: auto;
-                    color: #94A3B8;
+                    color: var(--text-muted);
                 }
 
                 .modal-footer {
@@ -465,27 +465,27 @@ export default function TodoModal({
 
                 .cancel-btn {
                     padding: 16px;
-                    border-radius: 14px;
+                    border-radius: var(--radius-md);
                     font-weight: 700;
                     color: var(--text-secondary);
-                    background: #F1F5F9;
+                    background: var(--bg-surface);
                 }
 
                 .delete-btn {
                     padding: 16px;
-                    border-radius: 14px;
+                    border-radius: var(--radius-md);
                     font-weight: 700;
-                    color: #EF4444;
-                    background: #FEF2F2;
+                    color: var(--error);
+                    background: var(--error-bg);
                 }
 
                 .save-btn {
                     padding: 16px;
-                    border-radius: 14px;
+                    border-radius: var(--radius-md);
                     background: var(--accent-primary);
-                    color: white;
+                    color: var(--text-inverse);
                     font-weight: 800;
-                    font-size: 16px;
+                    font-size: var(--text-base);
                 }
 
                 .save-btn:disabled { opacity: 0.5; }

@@ -308,7 +308,7 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                 }
                 
                 .day-name {
-                    font-size: 11px;
+                    font-size: var(--text-xs);
                     font-weight: 600;
                     text-transform: uppercase;
                     margin-bottom: 4px;
@@ -320,14 +320,14 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 15px;
+                    font-size: var(--text-base);
                     font-weight: 700;
                     color: var(--text-primary);
                 }
 
                 .day-col-header.today .day-val-circle {
                     background: var(--accent-primary);
-                    color: white;
+                    color: var(--text-inverse);
                     border-radius: 50%;
                 }
 
@@ -355,7 +355,7 @@ export default function WeekView({ currentDate }: WeekViewProps) {
 
                 .time-label {
                     height: 70px;
-                    font-size: 11px;
+                    font-size: var(--text-xs);
                     font-weight: 500;
                     color: var(--text-muted);
                     text-align: right;
@@ -382,7 +382,7 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                     left: 0;
                     right: 0;
                     height: 2px;
-                    background: #EF4444;
+                    background: var(--accent-primary);
                     z-index: 10;
                     pointer-events: none;
                 }
@@ -393,9 +393,9 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                     top: -4px;
                     width: 10px;
                     height: 10px;
-                    background: #EF4444;
+                    background: var(--accent-primary);
                     border-radius: 50%;
-                    border: 2px solid white;
+                    border: 2px solid var(--bg-elevated);
                     box-shadow: 0 0 4px rgba(0,0,0,0.2);
                 }
 
@@ -406,7 +406,7 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                     border-radius: 6px;
                     padding: 6px;
                     background: var(--accent-primary);
-                    color: white;
+                    color: var(--text-inverse);
                     z-index: 2;
                     overflow: hidden;
                     display: flex;
@@ -422,7 +422,7 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                 }
 
                 .block-title {
-                    font-size: 11px;
+                    font-size: var(--text-xs);
                     font-weight: 700;
                     white-space: nowrap;
                     overflow: hidden;
@@ -430,15 +430,15 @@ export default function WeekView({ currentDate }: WeekViewProps) {
                 }
 
                 .block-time {
-                    font-size: 9px;
+                    font-size: var(--text-xs);
                     font-weight: 500;
                     opacity: 0.9;
                 }
 
-                .week-schedule-block.meeting { background: #3B82F6; }
-                .week-schedule-block.appointment { background: #EF4444; }
-                .week-schedule-block.important { background: #10B981; }
-                .week-schedule-block.default { background: #94A3B8; }
+                .week-schedule-block.meeting { background: var(--schedule-blue); }
+                .week-schedule-block.appointment { background: var(--schedule-red); }
+                .week-schedule-block.important { background: var(--schedule-green); }
+                .week-schedule-block.default { background: var(--schedule-gray); }
             `}</style>
     </div>
   );

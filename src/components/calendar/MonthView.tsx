@@ -131,20 +131,20 @@ export default function MonthView({ currentDate }: MonthViewProps) {
                     display: flex;
                     flex-direction: column;
                     height: 100%;
-                    background: white;
+                    background: var(--bg-elevated);
                 }
 
                 .weekdays-row {
                     display: grid;
                     grid-template-columns: repeat(7, 1fr);
                     padding: 12px 0;
-                    border-bottom: 1px solid #F1F5F9;
+                    border-bottom: 1px solid var(--border-subtle);
                 }
 
                 .weekday-label {
                     text-align: center;
-                    font-size: 13px;
-                    color: #94A3B8;
+                    font-size: var(--text-xs);
+                    color: var(--text-muted);
                     font-weight: 500;
                 }
 
@@ -156,8 +156,8 @@ export default function MonthView({ currentDate }: MonthViewProps) {
                 }
 
                 .calendar-cell {
-                    border-right: 1px solid #F1F5F9;
-                    border-bottom: 1px solid #F1F5F9;
+                    border-right: 1px solid var(--border-subtle);
+                    border-bottom: 1px solid var(--border-subtle);
                     padding: 8px;
                     display: flex;
                     flex-direction: column;
@@ -167,25 +167,25 @@ export default function MonthView({ currentDate }: MonthViewProps) {
                 }
 
                 .calendar-cell:hover {
-                    background: #F8FAFC;
+                    background: var(--bg-surface);
                 }
-                
+
                 .calendar-cell:nth-child(7n) {
                     border-right: none;
                 }
 
                 .calendar-cell.other-month {
-                    background: #FAFAFA;
+                    background: var(--bg-surface);
                 }
-                
+
                 .calendar-cell.other-month .day-number {
-                    color: #CBD5E1;
+                    color: var(--slate-300);
                 }
 
                 .day-number {
-                    font-size: 15px;
+                    font-size: var(--text-sm);
                     font-weight: 500;
-                    color: #1A1A1A;
+                    color: var(--text-primary);
                     margin-bottom: 4px;
                     width: 28px;
                     height: 28px;
@@ -195,8 +195,8 @@ export default function MonthView({ currentDate }: MonthViewProps) {
                 }
 
                 .calendar-cell.today .day-number {
-                    background: #1C1C1E;
-                    color: white;
+                    background: var(--text-primary);
+                    color: var(--text-inverse);
                     border-radius: 8px;
                     font-weight: 600;
                 }
@@ -213,11 +213,11 @@ export default function MonthView({ currentDate }: MonthViewProps) {
                     flex-direction: column;
                     padding: 3px 6px;
                     border-radius: 6px;
-                    font-size: 10px;
+                    font-size: var(--text-xs);
                     font-weight: 600;
                     margin-bottom: 2px;
                     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-                    color: white;
+                    color: var(--text-inverse);
                     border: 1px solid transparent;
                 }
 
@@ -241,20 +241,20 @@ export default function MonthView({ currentDate }: MonthViewProps) {
                 }
 
                 .chip-tag {
-                    font-size: 8px;
+                    font-size: var(--text-xs);
                     padding: 0 3px;
                     border-radius: 3px;
                     font-weight: 800;
                     flex-shrink: 0;
                 }
 
-                .chip-tag.all-day { background: #1E293B; color: white; }
-                .chip-tag.no-time { background: #CBD5E1; color: #1E293B; }
+                .chip-tag.all-day { background: var(--text-primary); color: var(--text-inverse); }
+                .chip-tag.no-time { background: var(--border-default); color: var(--text-primary); }
 
                 .type-prefix {
                     opacity: 0.85;
                     font-weight: 800;
-                    font-size: 9px;
+                    font-size: var(--text-xs);
                     flex-shrink: 0;
                 }
 
@@ -266,7 +266,7 @@ export default function MonthView({ currentDate }: MonthViewProps) {
                 }
 
                 .status-tag {
-                    font-size: 8px;
+                    font-size: var(--text-xs);
                     background: rgba(255, 255, 255, 0.2);
                     padding: 1px 4px;
                     border-radius: 4px;
@@ -275,15 +275,15 @@ export default function MonthView({ currentDate }: MonthViewProps) {
                 }
 
                 /* Blocks Colors */
-                .schedule-chip-premium.meeting { background: #1C1C1E; }
-                .schedule-chip-premium.appointment { background: #EF4444; }
-                .schedule-chip-premium.important { background: #10B981; }
-                .schedule-chip-premium.default { background: #94A3B8; }
+                .schedule-chip-premium.meeting { background: var(--text-primary); }
+                .schedule-chip-premium.appointment { background: var(--schedule-red); }
+                .schedule-chip-premium.important { background: var(--schedule-green); }
+                .schedule-chip-premium.default { background: var(--schedule-gray); }
 
                 .more-count {
-                    font-size: 10px;
+                    font-size: var(--text-xs);
                     font-weight: 700;
-                    color: #94A3B8;
+                    color: var(--text-muted);
                     padding-left: 4px;
                 }
             `}</style>
